@@ -22,6 +22,18 @@
 .resume-buttons .btn.primary:hover{background:#e1f2ee}
 @media(max-width:620px){.resume-buttons{flex-direction:column}.resume-buttons .btn{width:100%}}
 
+/* Brand gallery: large, legible wordmarks rather than tiny favicons. */
+.fmb-brand-tile{flex-direction:column;justify-content:center;align-items:center;gap:6px;min-height:101px;padding:11px 8px}
+.fmb-brand-markbox{display:flex;align-items:center;justify-content:center;width:100%;height:49px}
+.fmb-brand-mark{display:block;max-width:92%;max-height:49px;width:auto;height:auto;object-fit:contain;mix-blend-mode:multiply}
+.fmb-brand-mark[hidden],.fmb-brand-wordmark[hidden]{display:none!important}
+.fmb-brand-wordmark{font-size:clamp(15px,1.65vw,23px);font-weight:900;line-height:1;letter-spacing:-.7px;text-transform:uppercase;font-style:italic;color:#162d2e}
+.fmb-brand-tile[data-brand="Yeti"] .fmb-brand-wordmark{letter-spacing:2.5px}
+.fmb-brand-tile[data-brand="Transition"] .fmb-brand-wordmark{font-size:clamp(12px,1.3vw,18px);letter-spacing:-.8px}
+.fmb-brand-tile[data-brand="Allied"] .fmb-brand-wordmark{font-style:normal;letter-spacing:2px}
+.fmb-brand-caption{font-size:11px;font-weight:700;color:#687a80}
+@media(max-width:700px){.fmb-brand-tile{min-height:89px}.fmb-brand-markbox{height:39px}.fmb-brand-mark{max-height:39px}.fmb-brand-wordmark{font-size:15px}}
+
 /* Questionnaire: reading-first, distraction-free layout */
 #wizardView .wizard-wrap{max-width:850px;margin:30px auto 0}
 #wizardView .wizard-panel{padding:40px 46px 33px;border:1px solid #d5e1e1;box-shadow:0 10px 40px rgba(16,58,55,.075);border-radius:22px}
@@ -1073,10 +1085,29 @@ function range(a){a=a.filter(Number.isFinite);return a.length?Math.max(...a)-Mat
 function updateFromAnswer(id,val){state.overrides={};if(id==='suspensionType')state.suspensionType=val;if(id==='quiver')state.quiver=val;if(id==='existing')state.existing=val;if(id==='role')state.role=val;if(id==='features')state.features=val;if(id==='park')state.park=val;if(id==='ride')state.ride=val;if(id==='focus'){state.focus=val;state.priority={...state.priority,...({climb:{cl:10,de:5,weight:7,play:4},balanced:{cl:8,de:8,weight:5,play:6},descend:{cl:5,de:10,weight:3,play:6},light:{cl:9,de:6,weight:10,play:6}}[val])};}if(id==='tech')state.tech=val;if(id==='feel')state.feel=val;if(id==='weight')state.priority.weight={low:1,medium:5,high:10}[val];if(id==='cool')state.priority.cool={low:0,medium:5,high:10}[val];if(id==='value')state.priority.price={value:10,balanced:6,premium:2}[val];if(prefQs.includes(id)&&id!=='brand'){state.prefs[id]=val;state.strength[id]=['drive','shift'].includes(id)?'prefer':($('strengthSelect')?.value||'prefer');}}
 
 const BRAND_NAMES=['Revel','Ibis','Pivot','Yeti','Santa Cruz','Scott','Specialized','Canyon','Transition','Trek','Allied'];
-const BRAND_DOMAINS={'Revel':'revelbikes.com','Ibis':'ibiscycles.com','Pivot':'pivotcycles.com','Yeti':'yeticycles.com','Santa Cruz':'santacruzbicycles.com','Scott':'scott-sports.com','Specialized':'specialized.com','Canyon':'canyon.com','Transition':'transitionbikes.com','Trek':'trekbikes.com','Allied':'alliedcycleworks.com'};
+/* Recognizable bicycle-maker marks, not browser favicons.
+   Keep the visible text label for accessibility and as a fallback.
+   If any external mark fails, the brand remains legible. */
+const BRAND_LOGOS={
+'Revel':'https://cdn.knoji.com/images/logo/revel-bikes.jpg?extend=25&fit=contain&flatten=true&height=630&trim=true&width=1200',
+'Ibis':'https://cdn.velobiz.de/thumbnails/lightbox/originals/0437a296-1144-4a0b-9158-42e665ef37c4.jpg',
+'Pivot':'https://bici.cc/cdn/shop/collections/Pivot__logo_540_b436fd2d-bcfb-41f9-964b-41ec36aa5b0f.png?v=1722706617',
+'Santa Cruz':'https://www.santacruzbicycles.com/cdn/shop/files/SCB_Logo-black_Shopify-aspect-4-3_25938bb5-13a4-4388-afb4-7de00b25e35a.jpg?v=1747697584&width=800',
+'Scott':'https://cycleways.com/cdn/shop/collections/CW_1000_x_1000_px_9_1200x1200.png?v=1759437239',
+'Specialized':'https://biketech24.de/cdn/shop/files/specialized-logo-1200x708.jpg?v=1779809737&width=750',
+'Canyon':'https://welikebikes.de/cdn/shop/files/Background-Image-landing-page_canyon_1befb080-d7f4-41a9-bf6b-158adb2c7ffd.png?v=1725703318',
+'Trek':'https://biket.co.za/cdn/shop/files/Trek_Bicycle_Corporation-Logo.wine.jpg?v=1706942789&width=800'
+};
+/* Current manufacturer wordmarks are represented typographically when
+   a reliable bicycle-specific image source is unavailable (Yeti, Allied, Transition).
+   Do not substitute similarly named non-bicycle companies. */
 function renderWelcomeBrands(){
  const brands=[...new Set(B.map(b=>b.brand))].sort((a,b)=>a.localeCompare(b));
- $('welcomeBrandGrid').innerHTML=brands.map(brand=>`<button type="button" class="fmb-brand-tile" data-brand="${esc(brand)}" aria-label="View ${esc(brand)} bikes"><img class="fmb-brand-icon" src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(BRAND_DOMAINS[brand]||'')}&sz=64" alt="" loading="lazy" onerror="this.style.display='none'"><span class="fmb-brand-name">${esc(brand)}</span></button>`).join('');
+ $('welcomeBrandGrid').innerHTML=brands.map(brand=>{
+  const logo=BRAND_LOGOS[brand];
+  const mark=logo?`<img class="fmb-brand-mark" src="${esc(logo)}" alt="${esc(brand)} logo" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="fmb-brand-wordmark" hidden>${esc(brand)}</span>`:`<span class="fmb-brand-wordmark">${esc(brand)}</span>`;
+  return `<button type="button" class="fmb-brand-tile" data-brand="${esc(brand)}" aria-label="View ${esc(brand)} bikes"><span class="fmb-brand-markbox">${mark}</span><span class="fmb-brand-caption">${esc(brand)}</span></button>`;
+ }).join('');
 }
 
 function brandEditor(){return `<div class="brand-choices"><div><h3>Brands I like <small>(choose up to 3)</small></h3><div class="brand-chips">${BRAND_NAMES.map(name=>`<label class="brand-chip ${state.prefs.brand.includes(name)?'selected':''}"><input type="checkbox" data-brand-like="${name}" ${state.prefs.brand.includes(name)?'checked':''} ${state.prefs.exclude.includes(name)?'disabled':''}>${name}</label>`).join('')}</div></div><div><h3>Brands I'd rather avoid <small>(optional)</small></h3><div class="brand-chips">${BRAND_NAMES.map(name=>`<label class="brand-chip dislike ${state.prefs.exclude.includes(name)?'selected':''}"><input type="checkbox" data-brand-dislike="${name}" ${state.prefs.exclude.includes(name)?'checked':''} ${state.prefs.brand.includes(name)?'disabled':''}>${name}</label>`).join('')}</div></div><p class="note" id="brandSummary">You can select up to 3 favorites. Liking or disliking a brand changes its score slightly but doesn't exclude it.</p></div>`;}
