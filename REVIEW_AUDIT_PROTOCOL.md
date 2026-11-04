@@ -97,3 +97,10 @@ Numbers represent comparative editorial scores, not source-published numerical t
 
 ### Next run priority
 Finish 35 remaining bike-by-bike exact-generation verification and supporting review grading; prioritize the existing seven model/bike families with 2027 launches and verified generation changes, audit build weights by size, reconcile source-linked geometry and factory build configuration/US MSRP; then rescore only where a change is defensible. Validate UI rankings for repeatable XC/DC/trail/enduro rider profiles after any additional changes.
+
+### Lineup reconciliation flag, 2026-11-04
+Yeti's official support article **Current Yeti bike lineup**, updated Oct 28 2026, lists SB140 among past models but the brand's public SB140 purchase/product page still displays kits and prices. Treat the SB140's **new-production status as unresolved**; do not assert it is current or retired solely from one page. Confirm directly before dropping or retaining it in current-model recommendations.
+- https://support.yeticycles.com/hc/en-us/articles/57879114400283-Current-Yeti-bike-lineup
+- https://yeticycles.com/en-us/bikes/sb140
+
+Manufacturer lineup spotchecks (not complete geometry/build audits) included the current Pivot, Ibis, Revel, Trek and Canyon model catalogs. Remaining model-specific checks remain in queue.
