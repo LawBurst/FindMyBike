@@ -952,6 +952,18 @@ SOURCE_AUDIT_20261104.scalpel={
 // No numerical claims of geometry-driven performance where geometry evidence is incomplete.
 // Models still retain their original, explicitly provisional climb/descend estimates.
 
+/* Catalog reconciliation with explicitly requested FindMyBike removals (Nov 4).
+   Keep research records for audit traceability; remove these from the actual
+   selectable bike list, comparisons, brand exploration, and recommendation engine.
+   Trek Fuel EX/LX and Specialized Stumpjumper 15/15 EVO are retained. */
+const REMOVED_FROM_CATALOG=new Set([
+ 'ransom','spire','eljefe','highball','scalerc',
+ 'roscoe','procaliber','spark910','neuron'
+]);
+for(let i=B.length-1;i>=0;i--)if(REMOVED_FROM_CATALOG.has(B[i].id))B.splice(i,1);
+const spectralCurrent=B.find(b=>b.id==='spectral');
+if(spectralCurrent)spectralCurrent.cat='trail';
+
 /* Ride-character notes audited 2026-11-03 against independent reviews; editorial comparisons, not laboratory tests. */
 const $=id=>document.getElementById(id), money=v=>v==null?'Check price':'$'+Math.round(v).toLocaleString('en-US');
 const defaults=()=>({suspensionType:'either',ride:'mixed',quiver:'one',existing:'mixed',role:'mixed',features:'none',park:'never',focus:'balanced',budget:7500,stretch:'0',tech:'mixed',feel:'balanced',priority:{cl:7,de:7,weight:5,cool:4,price:7,play:5},prefs:{drive:'none',shift:'none',wheel:'none',fork:'none',brake:'none',frame:'none',wheelSize:'29',brand:[],exclude:[]},strength:{},overrides:{},extraBike:null,limit:true});let state=defaults(),answers={},history=[],qid='quiver',finished=false,activeTab='wizard';let welcomeDismissed=false,forceWelcome=false;
@@ -1470,6 +1482,10 @@ function renderSources(){
 document.getElementById('sourcesSearch').addEventListener('input',renderSources);
 document.getElementById('sourcesType').addEventListener('change',renderSources);
 renderWelcomeBrands();
+// Derive the navigation label from the actual filtered catalog rather than a
+// manually maintained count that becomes stale when models change.
+document.querySelector('[data-tab="all"]').textContent='Compare '+B.length+' bikes';
+document.querySelector('#allView .sectionhead h2').textContent='Compare all '+B.length+' bikes';
 $('welcomeBrandGrid').addEventListener('click',e=>{const button=e.target.closest('[data-brand]');if(!button)return;comparisonBrandFilter=button.dataset.brand;fmbTrack('Brand explored',{brand:comparisonBrandFilter});setTab('all');$('allView').scrollIntoView({behavior:'smooth',block:'start'});});
 function updateWelcomeActions(){
  const progress=finished||history.length>0||Object.keys(answers).length>0;
