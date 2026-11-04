@@ -1463,9 +1463,14 @@ function showWizardStage(){
  if(welcome)updateWelcomeActions();else questionShow();
 }
 function resetForNewSearch(){
+ // "Start new" and "Start over" must also clear the previous-results
+ // shortcut, otherwise the next visit misleadingly offers the old search.
+ try{localStorage.removeItem(completedKey);}catch(e){}
+ state=defaults();answers={};history=[];qid='quiver';finished=false;
+ forceWelcome=false;welcomeDismissed=true;
+ $('results').classList.add('hidden');
+ save();setTab('wizard');
  fmbTrack('Questionnaire started',{entry:'new'});
- state=defaults();answers={};history=[];qid='quiver';finished=false;forceWelcome=false;welcomeDismissed=true;
- $('results').classList.add('hidden');save();setTab('wizard');
  $('questionTitle').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function setTab(tab){if(tab==='dashboard'&&!finished)tab='wizard';if(activeTab!==tab&&['dashboard','all','ratings','sources'].includes(tab))fmbTrack('Section viewed',{section:tab});activeTab=tab;const finalistTab=document.querySelector('[data-tab="dashboard"]');if(finalistTab)finalistTab.classList.toggle('hidden',!finished);['wizard','dashboard','all','ratings','sources'].forEach(n=>{$(n+'View').classList.toggle('hidden',n!==tab)});document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));if(tab==='dashboard')drawDashboard();if(tab==='all')allTable();if(tab==='sources')renderSources();if(tab==='wizard')showWizardStage();}
@@ -1486,7 +1491,7 @@ function openLaunchPage(){forceWelcome=true;setTab('wizard');window.scrollTo({to
 $('homeBrand').addEventListener('click',openLaunchPage);
 $('homeBrand').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLaunchPage();}});
 function scrollToFinalists(){requestAnimationFrame(()=>{$('results').scrollIntoView({behavior:'auto',block:'start'});});}
-function reveal(){finished=true;fmbTrack('Questionnaire completed',{questions:history.length,early:true});setTab('dashboard');showResults();scrollToFinalists();}document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{setTab(el.dataset.tab);if(el.dataset.tab==='dashboard')scrollToFinalists();}));$('next').onclick=nextQuestion;$('back').onclick=prevQuestion;$('skip').onclick=()=>{if(['quiver','suspensionType','ride','focus','budget'].includes(qid))return;answers[qid]='none';nextQuestion();};$('seeNow').onclick=reveal;$('fineTune').onclick=()=>{$('tuning').scrollIntoView({behavior:'smooth',block:'start'});};$('resetResults').onclick=()=>{if(!confirm('Clear this rider’s answers and start over?'))return;state=defaults();answers={};history=[];qid='quiver';finished=false;welcomeDismissed=true;$('results').classList.add('hidden');setTab('wizard');save();};$('resetWizard').onclick=()=>$('resetResults').click();
+function reveal(){finished=true;fmbTrack('Questionnaire completed',{questions:history.length,early:true});setTab('dashboard');showResults();scrollToFinalists();}document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{setTab(el.dataset.tab);if(el.dataset.tab==='dashboard')scrollToFinalists();}));$('next').onclick=nextQuestion;$('back').onclick=prevQuestion;$('skip').onclick=()=>{if(['quiver','suspensionType','ride','focus','budget'].includes(qid))return;answers[qid]='none';nextQuestion();};$('seeNow').onclick=reveal;$('fineTune').onclick=()=>{$('tuning').scrollIntoView({behavior:'smooth',block:'start'});};$('resetResults').onclick=()=>{if(!confirm('Clear this rider’s answers and previous results, and start over?'))return;resetForNewSearch();};$('resetWizard').onclick=()=>$('resetResults').click();
 function makePrintableResults(){
   if(!finished){alert('Answer the questions and open Your Finalists first.');return;}
   const items=suitable().slice(0,3);
