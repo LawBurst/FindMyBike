@@ -104,3 +104,6 @@ Yeti's official support article **Current Yeti bike lineup**, updated Oct 28 202
 - https://yeticycles.com/en-us/bikes/sb140
 
 Manufacturer lineup spotchecks (not complete geometry/build audits) included the current Pivot, Ibis, Revel, Trek and Canyon model catalogs. Remaining model-specific checks remain in queue.
+
+### Source coverage: Worldwide Cyclery (2026-11-04)
+Search both the [Worldwide Cyclery blog](https://worldwidecyclery.com/blogs/worldwide-cyclery-blog) and the [official Worldwide Cyclery YouTube channel](https://www.youtube.com/@WorldwideCyclery) when auditing a model. Include relevant MTB Podcast episodes as contextual material. Treat these as retailer-produced editorial material, not automatically independent third-party scoring evidence. If the blog embeds or summarizes the same YouTube ride test, record both URLs for transparency but count it as one underlying test. Record bike generation/build, ride-test evidence versus product overview, sponsorship, publication date, and claims before changing scores.
