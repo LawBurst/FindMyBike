@@ -1,10 +1,7 @@
 {
-  "embedded_local_photos": 42,
+  "embedded_local_photos": 46,
   "missing_ids": [
-    "switchblade",
-    "firebird",
-    "mt",
-    "arc"
+    "mt"
   ],
   "image_files": {
     "ranger": "images/ranger.webp",
@@ -48,6 +45,10 @@
     "epic9": "images/epic9.webp",
     "trailcatsl": "images/trailcatsl.webp",
     "supercal": "images/supercal.webp",
-    "chisel": "images/chisel.webp"
+    "chisel": "images/chisel.webp",
+    "switchblade": "images/switchblade.webp",
+    "firebird": "images/firebird.webp",
+    "yetimt": "images/yetimt.webp",
+    "arc": "images/arc.webp"
   }
 }
