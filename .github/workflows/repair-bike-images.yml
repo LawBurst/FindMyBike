@@ -1,0 +1,100 @@
+name: Repair four missing FindMyBike photos
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/repair-bike-images.yml
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website
+        uses: actions/checkout@v4
+      - name: Install image processing
+        run: python -m pip install --quiet pillow
+      - name: Download and install verified model photos
+        shell: bash
+        run: |
+          python - <<'PY'
+          import io, json, pathlib, time, urllib.request
+          from PIL import Image
+          root=pathlib.Path('.')
+          photos={
+            'switchblade':{
+              'urls':[
+                'https://followmestore.de/media/image/6f/77/90/Pivot-Switchblade-Ride-GX-Eagle-Transmision-blau-2024.jpg',
+                'https://cdn.shoplightspeed.com/shops/625804/files/60927308/pivot-2026-pivot-switchblade-ride-gx-axs.jpg'
+              ], 'source':'https://www.pivotcycles.com/en-us/bikes/switchblade','credit':'Pivot Switchblade (2026 retailer)'},
+            'firebird':{
+              'urls':[
+                'https://cripplecreekbc.com/cdn/shop/files/bwmWDIVg.png?v=1781044891',
+                'https://www.pivotcycles.com/en-us/products/firebird-ride-gx-eagle-transmission-29'
+              ], 'source':'https://www.pivotcycles.com/en-us/bikes/firebird','credit':'Pivot Firebird V5 full 29 (retailer)'},
+            'yetimt':{
+              'urls':[
+                'https://theloamwolf.com/wp-content/uploads/2026/08/MY27_MT_Turq_XX_Profile-1.jpg',
+                'https://theloamwolf.com/wp-content/uploads/2026/08/MY27_MT_Gunmetal_X0_Profile.jpg',
+                'https://ep1.pinkbike.org/p4pb30093175/p4pb30093175.jpg'
+              ], 'source':'https://yeticycles.com/en-us/bikes/mt','credit':'Yeti MT Sixfinity 2027 (review photography)'},
+            'arc':{
+              'urls':[
+                'https://pedalinn.au/cdn/shop/files/f2fb5561881a0f2e15409d41f5ba823c2a2a7c2af76b8c814730b9ab811a7bac__87550.webp?v=1743574397',
+                'https://cdn11.bigcommerce.com/s-b14e8/images/stencil/1280x1280/products/8230/111926/2026-yeti-arc-image-8__00717.1766747960.jpg?c=2'
+              ], 'source':'https://yeticycles.com/en-us/bikes/arc','credit':'Yeti ARC 2026 (retailer)'}
+          }
+          ok={}
+          for model,info in photos.items():
+            for url in info['urls']:
+              try:
+                req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; FindMyBike-Image-Cache/1.0)','Accept':'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'})
+                with urllib.request.urlopen(req,timeout=25) as response:
+                  payload=response.read(12_000_000)
+                  ctype=response.headers.get('Content-Type','')
+                im=Image.open(io.BytesIO(payload)); im.load()
+                if im.width<650 or im.height<350: raise ValueError('Small image: %sx%s' % im.size)
+                dest=root/'images'/f'{model}.webp'
+                if im.mode not in ('RGB','RGBA'): im=im.convert('RGB')
+                im.thumbnail((1600,1200))
+                im.save(dest,'WEBP',quality=85,method=5)
+                print('OK',model,im.size,url)
+                ok[model]=info
+                break
+              except Exception as exc:
+                print('FAILED',model,url,repr(exc))
+            if model not in ok:
+              print('MISSING',model)
+          html=(root/'index.html').read_text(encoding='utf-8')
+          photo_overrides={}
+          for model,info in ok.items():
+            photo_overrides[model]={'url':f'images/{model}.webp','source':info['source'],'credit':info['credit']}
+          anchor='const LOCAL_MODEL_IMAGES='
+          patch='Object.assign(BIKE_PHOTOS,'+json.dumps(photo_overrides,separators=(',',':'))+');\n'
+          if '/* PHOTO_REPAIR_2026_11_04 */' not in html:
+            if html.count(anchor)!=1: raise RuntimeError('Cannot identify image mapping anchor')
+            html=html.replace(anchor,'/* PHOTO_REPAIR_2026_11_04 */\n'+patch+anchor)
+          else:
+            start=html.index('/* PHOTO_REPAIR_2026_11_04 */')
+            end=html.index(anchor,start)
+            html=html[:start]+'/* PHOTO_REPAIR_2026_11_04 */\n'+patch+html[end:]
+          if ok: (root/'index.html').write_text(html,encoding='utf-8')
+          status_path=root/'photo_status.json'
+          status=json.loads(status_path.read_text(encoding='utf-8'))
+          for model in ok:
+            if model in status.get('missing_ids',[]): status['missing_ids'].remove(model)
+            status.setdefault('image_files',{})[model]=f'images/{model}.webp'
+          status['embedded_local_photos']=len(status['image_files'])
+          status_path.write_text(json.dumps(status,indent=2)+'\n',encoding='utf-8')
+          print('CACHED:',len(ok),'of',len(photos),'TOTAL:',status['embedded_local_photos'],'of 46')
+          if len(ok)!=len(photos): raise SystemExit('Not all images downloaded; incomplete cache left as uncommitted job artifacts.')
+          PY
+      - name: Commit verified images to repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/ index.html photo_status.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Cache four missing current-model bicycle photos locally"
+            git push
+          fi
