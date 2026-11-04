@@ -1,8 +1,6 @@
 {
   "embedded_local_photos": 46,
-  "missing_ids": [
-    "mt"
-  ],
+  "missing_ids": [],
   "image_files": {
     "ranger": "images/ranger.webp",
     "ripleySL": "images/ripleySL.webp",
