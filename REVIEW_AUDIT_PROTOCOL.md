@@ -56,3 +56,44 @@ Keep separate descriptors and ratings for climbing efficiency, technical climbin
 - https://www.outsideonline.com/outdoor-gear/bikes-and-biking/best-trail-bikes?scope=anon
 
 This file documents the protocol; it does not certify all bike specifications, scores or individual links.
+
+## Audit run: 2026-11-04 (first scoring update, v6.8)
+**Scope and caveat:** This is a substantive first pass, **not** a completed 46-bike full independent model-and-build audit. Eleven bikes now have source-level evidence tiers (A/B/C/D); 35 are still awaiting that work. Manufacturer lineup spotchecks were performed for Canyon, Trek, Ibis, Pivot and Santa Cruz, but not every build/size/price. The daily 8 AM America/Denver automation will continue the queue.
+
+### Reviewed bike evidence and scores
+| Model | Evidence | Old climb | New climb | Old descend | New descend | Decision |
+|---|---|---:|---:|---:|---:|---|
+| Pivot Trailcat SL (2026) | A: Loam Wolf 2026 full test and Mountain Bike Action 2025 SL/LT long form | 9.20 | 9.20 | 8.95 | **8.80** | Fast steep descents notably less settled; reviewers differed on climbing position; retain climb |
+| Pivot Trailcat LT (2026) | A: BikeRadar full test; Mountain Bike Action comparison; ENDURO 2026 group test | 8.80 | **8.70** | 9.30 | 9.30 | Good climbing, but ENDURO reported light front end and weaker grip on steep technical climbs |
+| Revel Ranger V3 | A: BIKEPACKING.com 2026 month-long and NSMB Oct 2026 two-month | 9.35 | 9.35 | 9.15 | 9.15 | Consensus supported; no change |
+| Pivot Mach 4 SL V4 | B: Blister 2026 5-month full test; Pinkbike launch not counted | 9.65 | 9.65 | 8.65 | 8.65 | Existing scores plausibly supported, more source comparison pending |
+| Canyon Lux Trail 2027 | C: Pinkbike exact-generation first ride; ENDURO first look | 9.00 | 9.00 | 8.70 | 8.70 | No score change without full comparative corroboration |
+| Trek Fuel EX Gen 7 | B: Singletracks EX/LX comparative hands-on, Pinkbike review link pending individual depth audit | 8.40 | 8.40 | 9.35 | 9.35 | No change |
+| Trek Fuel LX Gen 7 | B: Singletracks full head-to-head with EX | 8.05 | 8.05 | 9.65 | 9.65 | No change |
+| Transition Spur V2 | B: Pinkbike review March 2026 | 9.20 | 9.20 | 8.90 | 8.90 | No change |
+| Santa Cruz Tallboy 6 | C: Pinkbike first ride; additional links need individual depth audit | 9.00 | 9.00 | 9.35 | 9.35 | No change |
+| Ibis Ripley SL | D: Pinkbike introduction only | 9.35 | 9.35 | 8.55 | 8.55 | Scores provisional; don't treat as independently corroborated |
+| Specialized Epic 9 | C: BikeMag first ride May 2026 | 9.75 | 9.75 | 8.60 | 8.60 | No change |
+
+Numbers represent comparative editorial scores, not source-published numerical test ratings; the two changes are small confidence-calibrated adjustments that may be revised with new evidence.
+
+### Geometry and source improvements
+- Pivot Trailcat SL size-L low-setting geometry corrected to reach 480, stack 606, wheelbase 1226, chainstay 432, BB 338, STA 76°, HTA 65.8°; previously displayed medium-associated reach and wheelbase. Verified against dealer geometry reproduction (manufacturer-origin), flagged secondary.
+- Canyon Lux Trail 2027 size-L geometry recorded (reach 470, stack 616, STA 76.1°, HTA 64.8°, wheelbase 1231, chainstay 440, seat tube 450). Secondary size chart crosschecked against Canyon 2026 announcement.
+- Links now point to direct NSMB Revel Ranger riding review, direct Pivot LT full review, and Canyon 2027 first ride; non-testing launch links are not counted as long-term riding evidence.
+
+### Specific supporting reviews
+- https://nsmb.com/articles/revel-ranger/ (Oct 12 2026)
+- https://bikepacking.com/bikes/revel-ranger-v3-review/ (Jun 2 2026)
+- https://blisterreview.com/gear-reviews/pivot-mach-4-sl-v4 (Aug 2026)
+- https://theloamwolf.com/reviews/bikes/pivot-trailcat-sl-review/ (Sep 20 2026)
+- https://mbaction.com/pivot-trailcat-sl-lt-review/ (Nov 18 2025)
+- https://www.bikeradar.com/reviews/bikes/mountain-bikes/full-suspension-mountain-bikes/pivot-trailcat-lt-pro-x0-review
+- https://enduro-mtb.com/en/the-best-trail-bike-mtb-review/pivot-trailcat-lt-pro-x0/ (2026)
+- https://www.singletracks.com/mtb-gear/trek-fuel-ex-vs-lx-review-putting-modular-claims-to-the-practical-test/ (Oct 20 2026)
+- https://www.pinkbike.com/news/first-ride-canyon-lux-trail-light-slack-and-ready-for-long-rides-2026.html (2026)
+- https://media-centre.canyon.com/en-INT/267961-canyon-unveils-redesigned-lux-trail-built-to-play-the-trail/ (Jul 14 2026)
+- https://otesports.com/bikes/pivot-trailcat/ (geometry dealer)
+
+### Next run priority
+Finish 35 remaining bike-by-bike exact-generation verification and supporting review grading; prioritize the existing seven model/bike families with 2027 launches and verified generation changes, audit build weights by size, reconcile source-linked geometry and factory build configuration/US MSRP; then rescore only where a change is defensible. Validate UI rankings for repeatable XC/DC/trail/enduro rider profiles after any additional changes.
