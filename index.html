@@ -674,7 +674,7 @@
 <p class="fmb-ratings-lead">FindMyBike features a carefully curated collection of exceptional mountain bikes. We don't believe there's one best bike for everyone. Our goal is to find the bike that's best for you.</p>
 <div class="fmb-ratings-step"><div class="fmb-ratings-number">1</div><div><h3>How we evaluate bikes</h3><p>We combine independent, hands-on reviews of <b>current-generation</b> bikes with manufacturer specifications to assess climbing, descending, handling, and overall ride character.</p><p>We compare multiple reviewers whenever possible and update our ratings as new information becomes available.</p></div></div>
 <div class="fmb-ratings-step"><div class="fmb-ratings-number">2</div><div><h3>How we find your match</h3><p>We consider your riding style, terrain, budget, equipment preferences, and priorities to identify the bikes best suited to you. Your <b>Match Score</b> reflects how well a bike fits your needs, not simply how highly we rate its performance.</p><p><b>Value matters too.</b> Your budget determines which builds are eligible. Separately, your bang-for-your-buck preference can raise or lower a bike's match score by comparing the price and estimated equipment level of an eligible build with similarly oriented bikes. Value-focused riders get a stronger adjustment; premium-focused riders get little or none. We don't automatically favor cheaper bikes or reward or penalize brands by name.</p><p>Value comparisons are approximate and depend on the build specifications and prices we have verified, so they're one input alongside ride performance and fit.</p><div class="fmb-score-example"><b>Same bike. Different riders. Different recommendations.</b><p class="fmb-score-example-intro">A bike can be an excellent match for one rider and less suitable for another.</p><div class="fmb-score-example-values"><div><span class="fmb-rider-label">Rider A</span><span>Prioritizes climbing, efficiency, and lighter weight</span><strong>9.5<small>/10</small></strong><span>Personalized match</span></div><div><span class="fmb-rider-label">Rider B</span><span>Prioritizes aggressive descending and bike parks</span><strong>7.8<small>/10</small></strong><span>Personalized match</span></div></div><p class="fmb-score-example-note">Illustrative scores for the same bike, based on different riding priorities.</p></div></div></div>
-<div class="fmb-ratings-step"><div class="fmb-ratings-number">3</div><div><h3>What “Well reviewed” means</h3><p><span class="fmb-rating-evidence"><span aria-hidden="true">✓</span> Well reviewed</span> indicates at least two independent, current-generation hands-on tests. It reflects the depth of independent evidence, not whether one bike is better than another.</p></div></div>
+<div class="fmb-ratings-step"><div class="fmb-ratings-number">3</div><div><h3>How Cool Factor is calculated</h3><p>Cool Factor is an editorial desirability score: <b>brand desirability and prestige 40%</b>, <b>model design and aesthetics 30%</b>, <b>engineering innovation and uniqueness 20%</b>, and <b>enthusiast appeal 10%</b>. Brand prestige is assigned once per manufacturer; design and enthusiast inputs start from our previous model-specific editorial ratings, while innovation has a separate model score. These are subjective judgments, not independent review averages or measured facts. Your personal brand preferences are a separate match-score adjustment.</p></div></div><div class="fmb-ratings-step"><div class="fmb-ratings-number">4</div><div><h3>What “Well reviewed” means</h3><p><span class="fmb-rating-evidence"><span aria-hidden="true">✓</span> Well reviewed</span> indicates at least two independent, current-generation hands-on tests. It reflects the depth of independent evidence, not whether one bike is better than another.</p></div></div>
 <p class="fmb-ratings-note">Our ratings are informed editorial assessments, not laboratory measurements. Source links and audit notes appear under <button type="button" class="fmb-inline-link" data-tab="sources">Sources &amp; reviews</button>.</p>
 </div></section><section id="sourcesView" class="hidden"><div class="panel sources-page"><div id="reviewSourceReturn" class="review-source-return hidden"><button type="button" id="reviewSourceBack">← Back to previous page</button><span id="reviewSourceContext"></span></div>
 <div class="sectionhead"><h2>Sources &amp; reviews</h2><span class="muted tiny">Evidence ledger · initial audit Nov 4, 2026</span></div>
@@ -1279,6 +1279,46 @@ function reviewEvidenceAdjustment(b){
  if(tier==='A'&&tests>=2)return 0.20;
  if(tier==='B')return 0.05;
  return 0;
+}
+/* Cool Factor v2 (Nov 5 2026): brand prestige 40%, design 30%,
+ * model innovation 20%, enthusiast appeal 10%. Subjective editorial inputs,
+ * NOT lab scores or independent reviewer numerical averages.
+ * Existing per-model cool values seed the design/enthusiast ratings. */
+const COOL_BRAND_DESIRABILITY={
+ 'Yeti':9.8,'Pivot':9.5,'Santa Cruz':9.5,'Forbidden':9.4,
+ 'Revel':9.35,'Ibis':9.25,'Allied':9.2,'Transition':9.1,
+ 'Rocky Mountain':8.9,'Specialized':8.8,'Orbea':8.65,
+ 'Cannondale':8.6,'Scott':8.55,'Trek':8.4,'Canyon':8.15,'Ari':7.95
+};
+// Differentiated model design: special suspension layout, integrated tech,
+// distinctive structure or standout engineered feature; neutral=8.4.
+const COOL_MODEL_INNOVATION={
+ ranger:9.4,rascal:9.25,ritual:9.2,asr:9.1,mach4:9.1,
+ trailcat:9.2,trailcatsl:9.2,firebird:9.2,blur:8.8,
+ sparkRC:9.7,epic9:9.6,scalpel:9.5,supercal:9.8,
+ reya:9.5,druidv2:9.9,spur:9.1,smuggler:8.8,
+ ripleySL:9.1,ripley:8.9,alliedBC40:9.1,alliedFitz:9.5,
+ oiz:9.2,element:9.25,chisel:9.0,lasalpeak2:8.7,
+ signalpeak3:8.9,fuelex:9.1,stumpy:9.3,stumpyevo:9.45,
+ yetimt:9.5,yetilt:9.4,roscoe:8.65,tirade:9.0,
+ transam:8.65,arc:8.5,lessl:8.8,procaliber:9.0,
+ tallboy:8.9,luxTrail:9.1,neuron:8.45,rascal:9.25
+};
+const COOL_FACTOR_WEIGHTS={brand:0.40,design:0.30,innovation:0.20,enthusiast:0.10};
+const roundCool=x=>Math.round(x*10)/10;
+for(const b of B){
+ const previousCool=Number.isFinite(b.cool)?b.cool:8.2;
+ // Prior model-specific editorial assessment provides the design and
+ // enthusiast-appeal starting points until separately audited.
+ const dimensions={
+  brand:COOL_BRAND_DESIRABILITY[b.brand]??8.3,
+  design:previousCool,
+  innovation:COOL_MODEL_INNOVATION[b.id]??8.4,
+  enthusiast:previousCool
+ };
+ const calculated=Object.entries(COOL_FACTOR_WEIGHTS).reduce((sum,[key,weight])=>sum+dimensions[key]*weight,0);
+ b.coolBreakdown={...dimensions,previous:previousCool,weighted:calculated,weights:COOL_FACTOR_WEIGHTS};
+ b.cool=roundCool(calculated);
 }
 function scoreComponents(b,ignoreBrand=false){
  const p=state.priority,r=state.ride;
