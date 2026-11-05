@@ -54,6 +54,16 @@
 .fmb-brand-tile[data-brand="Transition"]{--brand-scale:.90}
 .fmb-brand-tile[data-brand="Trek"]{--brand-scale:1.5}
 .fmb-brand-tile[data-brand="Yeti"]{--brand-scale:1}
+/* These logos have different proportions. Fit each into the common stage
+   without stretching; adjust their apparent mark size individually. */
+.fmb-brand-tile[data-brand="Orbea"]{--brand-scale:1.1}
+.fmb-brand-tile[data-brand="Rocky Mountain"]{--brand-scale:.91}
+.fmb-brand-tile[data-brand="Ari"]{--brand-scale:.78}
+.fmb-brand-tile[data-brand="Rocky Mountain"] .fmb-brand-markbox{height:68px}
+.fmb-brand-tile[data-brand="Ari"] .fmb-brand-markbox{height:66px}
+.fmb-brand-tile[data-brand="Rocky Mountain"] .fmb-brand-mark,
+.fmb-brand-tile[data-brand="Ari"] .fmb-brand-mark{max-height:66px}
+
 .fmb-brand-tile[data-brand="Yeti"] .fmb-brand-wordmark{letter-spacing:2.5px}
 .fmb-brand-tile[data-brand="Transition"] .fmb-brand-wordmark{font-size:clamp(19px,1.85vw,27px)}
 .fmb-brand-tile[data-brand="Allied"] .fmb-brand-wordmark{font-style:normal;letter-spacing:2px}
@@ -963,8 +973,8 @@ const ADDED_BIKE_FAMILIES_20261104=[
   wNote:'2027 complete-build weight not normalized',cl:9.5,de:8.35,cool:8.7,play:8.3,
   frame:'carbon',generation:'2027 redesigned Oiz OMR/OMX 120/120mm',
   source:'https://www.orbea.com/en-us/oiz-m20',
-  review:'https://www.bikeradar.com/news/2026-orbea-oiz',
-  evidence:'Manufacturer current build + launch coverage; ride scores provisional',
+  review:'https://www.orbea.com/en-us/oiz-m20',
+  evidence:'Manufacturer current-generation build; independent hands-on review calibration pending',
   notes:'Redesigned 120mm XC race platform, efficient supportive suspension and 29-inch wheels. Orbea MyO allows extensive customization.',
   trade:'Race-oriented fit and remote suspension controls make it less relaxed than a general trail bike; latest-generation long-term review evidence is limited.',
   builds:[
@@ -1247,6 +1257,9 @@ const BRAND_NAMES=['Revel','Ibis','Pivot','Yeti','Santa Cruz','Scott','Specializ
    Keep the visible text label for accessibility and as a fallback.
    If any external mark fails, the brand remains legible. */
 const BRAND_LOGOS={
+'Orbea':'https://upload.wikimedia.org/wikipedia/commons/3/3c/Orbea_logo.svg',
+'Rocky Mountain':'https://bikes.com/cdn/shop/files/RMB_2020_Logo_Colour_5661191f-f8ba-47e7-b9fb-3d20018c2ef0.png?v=1640905156&width=600',
+'Ari':'https://static.truemed.com/mlp/ari-bikes/logo/317c28ce-775e-4e56-983f-e7f8b90c119d.jpg',
 'Revel':'https://cdn.knoji.com/images/logo/revel-bikes.jpg?extend=25&fit=contain&flatten=true&height=630&trim=true&width=1200',
 'Ibis':'https://cdn.velobiz.de/thumbnails/lightbox/originals/0437a296-1144-4a0b-9158-42e665ef37c4.jpg',
 
@@ -1662,7 +1675,26 @@ GEO_DATA.element={
  source:'https://bikes.com/en-intl/products/element-c50-26',
  verification:'Manufacturer geometry',checked:'2026-11-04'
 };
-GEO_DATA.scalpel={
+/* Manufacturer-published size L figures, mm / degrees, stock 29-inch. */
+GEO_DATA.signalpeak3={
+ st:450,ett:623.6,htl:120,hta:66.5,sta:76,cs:430,bb:341,
+ so:748.2,wb:1200.7,reach:470,stack:616.3,offset:44,
+ setting:'Signal Peak 3.0 / size L / stock 120mm fork / 29-inch',
+ source:'https://aribikes.com/collections/signal-peak-bike-support',
+ verification:'Manufacturer geometry',checked:'2026-11-04',
+ standoverSource:'https://aribikes.com/collections/signal-peak-bike-support',
+ standoverVerification:'Manufacturer L: 748.2mm',standoverChecked:'2026-11-04'
+};
+GEO_DATA.lasalpeak2={
+ st:440,ett:613.1,htl:110,hta:63.5,sta:77.5,cs:437,bb:347.6,
+ so:742.6,wb:1264.8,reach:485,stack:630.6,offset:44,
+ setting:'La Sal Peak 2.0 / size L / stock 170mm fork / 29-inch',
+ source:'https://aribikes.com/collections/lasal-bike-support',
+ verification:'Manufacturer geometry',checked:'2026-11-04',
+ standoverSource:'https://aribikes.com/collections/lasal-bike-support',
+ standoverVerification:'Manufacturer L: 742.6mm',standoverChecked:'2026-11-04'
+};
+
  st:445,ett:625,htl:100,hta:66.6,sta:75.5,cs:442,bb:334,so:752,
  wb:1202,reach:475,stack:607,offset:44,
  setting:'Current 120/120mm Scalpel / size L / 29-inch / non-Lefty',
