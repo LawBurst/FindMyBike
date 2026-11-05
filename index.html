@@ -1050,18 +1050,18 @@ for(const id of ['ranger','rascal','ritual','tirade']){
 }
 for(const [id,name,msrp,shift,wheel,path] of REVEL_FULL_BUILDS_20261105){
  MANUFACTURER_CONFIRMED_BUILDS_V61.push({
-  id,name,msrp,drive:'SRAM',shift,wheel,source:'https://revelbikes.com/products/'+path
+  id,name,msrp,drive:'SRAM',shift,wheel,source:'https://revelbikes.com/products/'+path,verifiedAt:'2026-11-05'
  });
 }
 for(const p of MANUFACTURER_CONFIRMED_BUILDS_V61){
  const bike=B.find(b=>b.id===p.id);if(!bike)continue;
  let build=bike.builds.find(x=>x.name===p.name);
  if(!build){build={name:p.name};bike.builds.push(build);}
- Object.assign(build,{msrp:p.msrp,sale:null,drive:p.drive,shift:p.shift,wheel:p.wheel,source:p.source,checked:'2026-11-03',priceType:'manufacturer',priceAudit:'Manufacturer list price checked 2026-11-03',streetAudit:'Street price not verified'});
+ Object.assign(build,{msrp:p.msrp,sale:null,drive:p.drive,shift:p.shift,wheel:p.wheel,source:p.source,checked:p.verifiedAt||'2026-11-03',priceType:'manufacturer',priceAudit:'Manufacturer list price checked '+(p.verifiedAt||'2026-11-03'),streetAudit:'Street price not verified'});
 }
 // Where an exact current factory lineup was checked, suppress older unverified choices.
 const CURRENT_BUILD_MODELS=new Set(MANUFACTURER_CONFIRMED_BUILDS_V61.map(x=>x.id));
-for(const b of B)if(CURRENT_BUILD_MODELS.has(b.id))b.builds=b.builds.filter(x=>x.priceAudit==='Manufacturer list price checked 2026-11-03');
+for(const b of B)if(CURRENT_BUILD_MODELS.has(b.id))b.builds=b.builds.filter(x=>x.priceAudit?.startsWith('Manufacturer list price checked '));
 // A mixed-wheel configuration is not a full 29er. Filter selection to the 29-inch build variant only.
 for(const b of B) b.builds=b.builds.filter(x=>!/\bMX\b|mixed wheels|mullet/i.test(x.name));
 // Don't promote provisional review scores to independent-review consensus.
