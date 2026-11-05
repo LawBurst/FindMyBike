@@ -51,6 +51,14 @@
 @media(max-width:700px){.fmb-brand-tile{min-height:86px;padding:10px 8px}.fmb-brand-markbox{height:47px}.fmb-brand-wordmark{font-size:clamp(15px,3vw,21px)}.fmb-brand-tile[data-brand="Rocky Mountain"] .fmb-brand-wordmark{font-size:clamp(11px,2.2vw,16px)}.fmb-brand-tile[data-brand="Santa Cruz"] .fmb-brand-wordmark,.fmb-brand-tile[data-brand="Cannondale"] .fmb-brand-wordmark,.fmb-brand-tile[data-brand="Specialized"] .fmb-brand-wordmark,.fmb-brand-tile[data-brand="Transition"] .fmb-brand-wordmark{font-size:clamp(12px,2.7vw,18px)}}
 
 
+
+.rider-review-list{list-style:none!important;padding:0!important;margin:14px 0 18px!important;display:grid;gap:11px}
+.rider-review-list li{padding:0 0 10px;border-bottom:1px solid #e5eeea;font-size:14px!important;line-height:1.55!important;margin:0!important}
+.rider-review-list b{color:#17574e}
+.rider-review-method{margin:17px 0;border-top:1px solid #dbe8e3;padding:12px 0;color:#526966}
+.rider-review-method summary{cursor:pointer;font-size:12px;font-weight:700;color:#326c61}
+.rider-review-method p{font-size:12px!important;line-height:1.6}
+
 /* What reviewers say: evidence-aware summary panel */
 .review-open{display:inline-flex;align-items:center;gap:6px;margin:10px 0 6px;padding:8px 11px;border-radius:8px;border:1px solid #95bbb2;background:#edf8f4;color:#176559;font-size:12px;font-weight:800;cursor:pointer}
 .review-open:hover,.review-open:focus-visible{background:#dff3eb;border-color:#276e62}
@@ -1415,31 +1423,82 @@ function reviewerSourceUrls(b){
  const maker=/(?:revelbikes|ibiscycles|pivotcycles|yeticycles|santacruzbicycles|scott-sports|specialized|canyon|transitionbikes|trekbikes|cannondale|orbea|bikes\.com|aribikes|alliedcycleworks)\.com/i;
  return [...new Set(urls)].filter(u=>{try{const x=new URL(u);return x.protocol==='https:'&&!maker.test(x.hostname)}catch(e){return false}});
 }
+/* Rider-first review summaries. Editorial paraphrases derived from recorded
+   model notes, tradeoffs and current-generation research. They are not quotes.
+   Detailed audit documentation remains available under Methodology. */
+const RIDER_REVIEW_SUMMARIES={
+"ranger":["Outstanding efficiency on long and technical climbs; traction is usually strong.","Remarkably composed and supportive in rough terrain for 120 mm rear travel.","Some steep climbs exposed inconsistent rear grip; suspension setup and firmer initial stroke matter.","A downcountry bike with trail-bike confidence, especially suited to riders who mix long climbs with demanding descents."],
+"ripleySL":["Lightweight, quick acceleration and efficient DW-link pedaling are its priorities.","Agile and responsive on flowing singletrack, with usable short-travel grip.","Less support for repeated heavy impacts than the regular Ripley; current-generation long-term tests remain limited.","Best for riders chasing low weight and speed who still want a playful bike on ordinary trails."],
+"mach4":["Exceptionally fast and efficient under power, with a clear race-bike response.","More cornering traction and technical descending confidence than its XC label suggests.","Firm race-oriented setup is less forgiving on sustained chunk; seated fit may depend on rider proportions.","An XC race bike that stretches toward downcountry without abandoning outright speed."],
+"asr":["Lightweight, direct pedaling and rapid acceleration favor XC racing.","Precise on XC courses, but built more for fast lines than repeated hard hits.","115 mm rear travel and race-focused position can feel demanding on rough, extended descents.","A specialist for racers and riders who want maximum efficiency over everyday trail plushness."],
+"blur":["Fast race-style acceleration with modern 120 mm suspension.","More capable on technical XC trails than older race-only designs.","Race equipment prioritizes speed over comfort; evidence on the newest generation is still developing.","An XC bike for racers who also encounter technical singletrack."],
+"sparkRC":["Very efficient XC pedaling with suspension controls that help manage varied terrain.","Composed across rough race-course features for its 120 mm rear travel.","Integrated shock, headset routing and multiple controls increase service and setup complexity.","A high-speed XC platform with a sophisticated suspension system and added maintenance considerations."],
+"rascal":["Efficient traction and comfortable pedaling make longer trail rides appealing.","Playful and agile, with impressive composure for 130 mm rear travel.","Less high-speed stability than burlier trail bikes; seated position may not suit every steep climb. In-frame storage is absent.","A versatile trail bike that rewards active handling and works well on varied singletrack."],
+"ripley":["Efficient DW-link suspension and lively response on technical climbs.","Agile 130 mm handling with considerably more downhill confidence than pure downcountry bikes.","On larger impacts, fork travel can be used quickly; less weight-focused than the Ripley SL.","A strong one-bike trail choice for riders who value both pedaling and technical descending."],
+"trailcat":["Efficient DW-link pedaling suits all-day mixed-terrain rides.","Fast, accurate cornering and composed handling despite 135 mm rear travel.","Steep technical climbs may require deliberate front-wheel weighting.","A balanced, energetic trail bike with more descending ability than its modest travel suggests."],
+"tallboy":["Good technical-climb traction and steady seated pedaling.","Secure, controlled handling on rough descents with 130 mm rear travel.","Less explosive on XC-style sprints than lighter downcountry bikes; limited longer-term evidence on V6.","A traction-rich trail bike that prioritizes composure and versatility."],
+"stumpy":["Steady climbing traction rather than XC-style acceleration.","Plush 145 mm suspension gives impressive security in rough terrain.","Heavier and less snappy than shorter-travel alternatives, especially on smooth climbs.","A comfortable and confidence-inspiring trail bike weighted toward descending."],
+"alliedBC40":["Lightweight XC intent and quick pedaling are central to the design.","120 mm suspension targets controlled handling on technical XC tracks.","Latest revised frame differs from the versions independently tested; current ride impressions remain provisional.","A distinctive premium XC option whose newest frame needs more exact-generation ride testing."],
+"alliedFitz":["Exceptional efficiency and traction for a 140 mm trail bike, ideal for long days.","Supportive and controlled rather than deeply plush, with confident trail handling.","Some reviews use an optional 150/150 setup rather than the stock 140/140 configuration.","A light, fast trail bike that favors long climbs and active riding over gravity-first plushness."],
+"luxTrail":["Fast pedaling and low-weight intent with more climbing comfort than a gravity-oriented trail bike.","Updated geometry and 140 mm fork add confidence on rougher singletrack.","Newest 125/140 generation has limited long-term independent testing.","A speed-focused downcountry bike that extends beyond traditional XC terrain."],
+"spur":["Responsive pedaling with strong traction, though not as explosive as dedicated XC race bikes.","Especially playful, lively handling and confident short-travel descending.","Longer wheelbase and seated position may feel less sharp on steep climbs; limited big-hit reserve.","An engaging downcountry bike for riders who prioritize fun handling alongside climbing."],
+"smuggler":["Efficient enough for regular trail loops without feeling race-focused.","Poppy, playful 130 mm suspension and confidence-inspiring geometry.","Less plush than some rivals; component value depends heavily on the selected build.","A lively everyday trail bike with an emphasis on creative line choice."],
+"topfuel":["Efficient 120 mm pedaling and broad setup adaptability.","130 mm front travel gives more descending confidence than pure XC race bikes.","Less sharp under race efforts; multiple geometry and suspension settings add complexity.","A customizable downcountry platform for mixed mileage and technical riding."],
+"fuelex":["Capable all-day trail pedaling, though not notably light.","Stable and predictable over sustained rough terrain, with 145 mm rear travel.","Heavier than short-travel bikes; more suspension than many riders need on rolling singletrack.","A practical, adjustable trail all-rounder with stronger descending emphasis."],
+"ritual":["Climbs credibly for an enduro bike, but remains substantially more demanding than a trail model.","Strong impact support, traction and lively handling on challenging descents.","Can feel excessive on mellow terrain; not the most planted option for outright race-speed stability.","A big-mountain bike that combines descending capability with a surprisingly playful character."],
+"ripmo":["Excellent technical climbing traction for an all-mountain chassis.","Holds its line through rough descents while remaining responsive to rider input.","Less quick and lively than a Ripley on smooth trails; build and wheel configurations vary.","A versatile all-mountain bike for long climbs followed by serious descents."],
+"switchblade":["Efficient DW-link pedaling suits ambitious backcountry rides.","Broad, supportive descending ability from technical trails to harder mountain terrain.","SuperBoost rear spacing limits some aftermarket wheel options.","A particularly broad-range all-mountain bike for riders who don't want separate bikes for climbs and descents."],
+"firebird":["Unusually efficient pedaling for a long-travel enduro race bike.","Excellent confidence, control and support at high speed on rough terrain.","Extra weight, travel and cost are difficult to justify for mellow trails.","A high-performance enduro bike that pedals impressively without sacrificing descending capability."],
+"yetimt":["Competent climbing for a planted all-mountain bike, but not especially quick.","Exceptional traction, braking composure and confidence in rough terrain.","Can feel less energetic on easy trails and long XC-style rides.","An all-mountain option for riders who prize descending composure over a lively ride."],
+"yetilt":["Good pedaling traction by enduro standards, though definitely gravity-oriented.","Exceptionally planted at race speed, with adjustable suspension feel and geometry.","Premium price, complex setup and less playful low-speed handling.","A serious enduro race platform for riders who value outright descending control."],
+"hightower":["Steady all-mountain climbing rather than lightweight XC response.","Secure full-29 handling and strong support on difficult descents.","More substantial and less lively than a Tallboy on easier terrain.","A dependable all-mountain choice for riders who regularly mix climbs with rough descents."],
+"megatower":["Credible pedaling for the enduro category, not a fast-mileage specialist.","Excellent grip and stability at speed on steep, demanding tracks.","Heavy-duty construction and long travel can feel excessive on smooth singletrack.","An enduro-first platform for serious steep, rough and fast riding."],
+"spectral":["Reasonably efficient and versatile on normal trail climbs.","Playful handling works especially well on flow trails, technical sections and smaller jumps.","Not a substitute for a purpose-built enduro bike on frequent park laps.","A fun, flexible trail bike that covers a wide range of everyday riding."],
+"sentinel":["Capable climbing for an aggressive bike, but more gravity-biased than a Smuggler.","Stable, supportive and confident at speed on rough trails.","Added mass and aggressive handling reduce its appeal for mileage-focused rides.","A hard-charging all-mountain bike that still works for pedal-powered adventures."],
+"fuellx":["Acceptable climbing for the travel, though less sprightly than Fuel EX.","Greater support and control than EX on steep and rough terrain.","More weight and suspension make flatter rides feel less energetic.","A descending-focused Fuel for technical trails without committing to a full race-enduro platform."],
+"stumpyevo":["Comfortable traction and useful pedal performance rather than sprinting sharpness.","Planted GENIE-assisted suspension and 160 mm fork encourage rough-trail confidence.","Heavier and slower to accelerate than shorter-travel bikes; configuration details matter.","An aggressive all-mountain bike combining trail versatility with added descending reserve."],
+"tirade":["Efficient, direct hardtail pedaling; slower steep climbs demand active weight placement.","Lively titanium chassis, confident cornering and a rewarding feel on faster trails.","Long front end can need front-wheel loading; low bottom bracket risks pedal strikes.","A premium trail hardtail for riders who value feedback and an engaging ride."],
+"lessl":["Very fast acceleration and efficient power transfer for XC racing.","Precise on XC terrain but rigid rear suspension limits rough-trail forgiveness.","Firm ride on repeated impacts; high price and press-fit bottom bracket may deter some.","A race-focused hardtail for maximum efficiency on suitable courses."],
+"arc":["Direct hardtail pedaling with lively trail handling.","140 mm fork helps it tackle varied trail lines confidently.","Rigid rear end becomes tiring in repetitive chunk; premium price.","A premium trail hardtail for riders who enjoy precision and a lively chassis."],
+"chameleon":["Direct acceleration and simple pedaling, with versatile dropout adjustment.","Playful and easy to move around on trail features.","Harsher on long rocky descents than full suspension; verify wheel configuration.","A versatile alloy trail hardtail built for fun and adaptability."],
+"transam":["Straightforward pedaling and easy-to-service hardtail construction.","Playful geometry and 150 mm fork invite active riding on rough trails.","Steel weight and rigid rear end make repeated square-edge impacts more tiring.","A robust trail hardtail for riders who enjoy lively, hands-on handling."],
+"epic9":["Excellent race-oriented speed, low weight and climbing efficiency.","Revised geometry adds technical XC confidence without losing quick handling.","Race-focused posture and high prices reduce its appeal for relaxed trail use.","A dedicated modern XC racer that performs better on technical courses than older race designs."],
+"trailcatsl":["Efficient climbing with strong grip, though testers differ on steep-climb seating.","Nimble, accurate handling and good versatility for 120 mm rear travel.","Some testers found fast, steep descents nervous; geometry rewards active control.","A lively downcountry bike blending strong pedaling with technical trail handling."],
+"supercal":["Exceptionally direct XC race efficiency with very little suspension movement.","Fast and precise on suitable XC courses, but not designed for repeated rough descents.","80 mm rear travel limits comfort, traction reserve and rough-trail versatility.","A highly specialized XC race bike for riders chasing speed over comfort."],
+"chisel":["Efficient XC suspension and quick enough acceleration for training or racing.","More controlled than a hardtail on technical XC tracks.","Aluminum frame and lower-tier components add weight versus premium carbon racers.","A value-conscious XC bike that keeps performance priorities without the top-end price."],
+"scalpel":["Quick, race-oriented pedaling with efficient FlexPivot suspension.","Surprisingly capable on technical XC descents for 120 mm travel.","Low cockpit and race tires prioritize speed over upright comfort and sustained chunk.","A lively XC bike with a useful amount of modern technical-trail capability."],
+"oiz":["Redesigned 120 mm platform targets fast, supportive pedaling.","Geometry and suspension suit technical XC riding, not all-mountain punishment.","Race cockpit and remote controls add setup complexity; long-term tests of 2027 generation remain limited.","A customizable modern XC race machine, with review consensus still developing."],
+"rallon7":["Functional climbing for an enduro bike, with a deliberate downhill bias.","Exceptionally planted on rough and steep tracks, aided by adjustable geometry.","Requires more climbing effort than lighter trail bikes; excessive for mellow riding.","A gravity-first enduro bike for racing and the hardest descending terrain."],
+"element":["Efficient 120 mm downcountry pedaling with adjustable geometry.","Trail-oriented front end adds confidence beyond conventional XC riding.","Not as explosive as dedicated XC race bikes; current-generation review calibration pending.","A technical downcountry bike for riders who value versatility and geometry adjustment."],
+"signalpeak3":["Low-weight 110/120 mm platform emphasizes efficient pedaling.","Responsive on XC terrain with modest additional technical-trail capability.","Less descending reserve than longer-travel downcountry bikes; exact-generation consensus pending.","A value-oriented XC choice centered on efficient mileage and practical builds."],
+"lasalpeak2":["Reasonable pedaling for 170 mm enduro travel, not a mileage-first machine.","Long-travel suspension and 29-inch wheels prioritize difficult descents.","Heavier builds feel less lively; far more bike than required for easy trails.","A high-value enduro bike for riders who prioritize travel and equipment over XC sharpness."]
+};
 function showReviewSummary(id){
  const b=B.find(x=>x.id===id);if(!b)return;
  const d=$('reviewDialog'),audit=SOURCE_AUDIT_20261104[b.id];
- const verified=(audit?.tier==='A'&&(VERIFIED_TEST_COUNTS[b.id]||0)>=2);
- const findings=verified?REVIEW_FINDINGS[b.id]:null;
+ const count=VERIFIED_TEST_COUNTS[b.id]||0;
+ const verified=audit?.tier==='A'&&count>=2;
+ const summaries=RIDER_REVIEW_SUMMARIES[b.id]||[
+  b.notes||'Pedaling performance is still being evaluated.',
+  'Current-generation descending characteristics need independent verification.',
+  b.trade||'Critical limitations are still being researched.',
+  'A preliminary catalog entry; further independent testing is required.'
+ ];
+ const labels=['Climbing','Descending','Criticisms','Overall'];
  $('reviewDialogTitle').textContent='What Reviewers Say · '+b.name;
- const line=([publisher,summary,url])=>'<li><b>'+esc(publisher)+':</b> '+esc(summary)+' <a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Read review ↗</a></li>';
- let html='<p class="review-detail-meta">'+esc(b.generation||'Generation pending verification')+' · '+(verified?'Multiple independent current-generation tests':'Review verification incomplete')+'</p>';
- if(findings){
-  html+='<div class="review-disclosure">Editorial paraphrases of the linked independent reviews, not direct quotes. Impressions may vary with build and setup.</div>';
-  html+='<h4>What reviewers liked</h4><ul>'+findings.pros.map(line).join('')+'</ul>';
-  html+='<h4>Criticisms and limitations</h4><ul>'+findings.cons.map(line).join('')+'</ul>';
- }else{
-  html+='<div class="review-disclosure">Preliminary FindMyBike research, not an independently verified reviewer consensus. The review audit for this exact generation is still in progress.</div>';
-  const basis=RESEARCH_V6[b.id]?.basis||b.researchV6?.basis||b.notes||'Review research pending.';
-  html+='<h4>Current research notes</h4><p>'+esc(basis)+'</p><h4>Tradeoff worth examining</h4><p>'+esc(b.trade||'Insufficient independent ride-test evidence.')+'</p>';
- }
- if(audit?.note)html+='<h4>Evidence and differing impressions</h4><p>'+esc(audit.note)+'</p>';
+ let html='<p class="review-detail-meta">'+esc(b.generation||'Current generation not yet independently confirmed')+' · '+(verified?count+' independent current-generation tests recorded':'Research summary · review verification '+(audit?.tier==='A'?'in progress':'incomplete'))+'</p>';
+ html+='<div class="review-disclosure">'+(verified?'These are FindMyBike editorial summaries of independent ride testing, not direct quotations.':'These are preliminary FindMyBike riding assessments, not verified reviewer consensus. Confirm against the original sources.')+'</div>';
+ html+='<ul class="rider-review-list">'+labels.map((label,i)=>'<li><b>'+label+':</b> '+esc(summaries[i])+'</li>').join('')+'</ul>';
  const sources=reviewerSourceUrls(b);
- html+='<h4>Independent source links</h4>';
- html+=sources.length?'<ul>'+sources.slice(0,8).map(u=>'<li><a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(new URL(u).hostname.replace(/^www\./,''))+' ↗</a></li>').join('')+'</ul>':'<p>Exact-generation independent review links are not yet verified.</p>';
- html+='<p class="review-detail-meta">FindMyBike climbing and descending scores are editorial estimates, not measured test data.</p>';
+ html+='<h4>Independent reviews and sources</h4>';
+ html+=sources.length?'<ul>'+sources.slice(0,8).map(u=>'<li><a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(new URL(u).hostname.replace(/^www\\./,''))+' ↗</a></li>').join('')+'</ul>':'<p>No independently verified exact-generation review links are available yet.</p>';
+ const auditText=[RESEARCH_V6[b.id]?.basis,b.researchV6?.basis,audit?.note].filter(Boolean);
+ if(auditText.length)html+='<details class="rider-review-method"><summary>Review methodology and verification notes</summary>'+auditText.map(note=>'<p>'+esc(note)+'</p>').join('')+'</details>';
+ html+='<p class="review-detail-meta">FindMyBike scores are editorial estimates, not standardized laboratory measurements. Build differences and reviewer opinions can affect ride impressions.</p>';
  $('reviewDialogBody').innerHTML=html;
- if(d.showModal)d.showModal();else d.setAttribute('open','');
+ if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');
 }
+
 document.addEventListener('click',e=>{const button=e.target.closest('[data-review-summary]');if(button){e.preventDefault();showReviewSummary(button.dataset.reviewSummary)}});
 $('dismissReview').addEventListener('click',()=>$('reviewDialog').close());
 $('reviewDialog').addEventListener('click',e=>{if(e.target===$('reviewDialog'))$('reviewDialog').close()});
