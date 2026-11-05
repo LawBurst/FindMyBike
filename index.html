@@ -26,6 +26,20 @@
 .fmb-brand-tile{display:flex;align-items:center;justify-content:center;min-height:102px;padding:12px 16px;overflow:hidden}
 .fmb-brand-markbox{position:relative;display:flex;align-items:center;justify-content:center;width:100%;max-width:290px;height:62px;min-width:0;overflow:hidden}
 .fmb-brand-mark{position:absolute;inset:0;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;opacity:0}
+/* Optical sizing: image files contain very different amounts of blank space.
+   These corrections target comparable *visible* wordmark sizes (not image bounds).
+   Never scale text fallbacks with the image. */
+.fmb-brand-mark{transform:scale(var(--logo-optical-scale,1));transform-origin:center}
+.fmb-brand-tile[data-brand="Ari"]{--logo-optical-scale:.95}
+.fmb-brand-tile[data-brand="Canyon"]{--logo-optical-scale:.84}
+.fmb-brand-tile[data-brand="Ibis"]{--logo-optical-scale:.83}
+.fmb-brand-tile[data-brand="Orbea"]{--logo-optical-scale:.56}
+.fmb-brand-tile[data-brand="Revel"]{--logo-optical-scale:2.15}
+.fmb-brand-tile[data-brand="Rocky Mountain"]{--logo-optical-scale:.88}
+.fmb-brand-tile[data-brand="Santa Cruz"]{--logo-optical-scale:2.05}
+.fmb-brand-tile[data-brand="Scott"]{--logo-optical-scale:2.05}
+.fmb-brand-tile[data-brand="Specialized"]{--logo-optical-scale:1.25}
+.fmb-brand-tile[data-brand="Trek"]{--logo-optical-scale:1.65}
 .fmb-brand-markbox[data-loaded="1"] .fmb-brand-mark{opacity:1}
 .fmb-brand-markbox[data-loaded="1"] .fmb-brand-wordmark{visibility:hidden}
 .fmb-brand-wordmark{display:block;max-width:100%;color:#162d2e;font-weight:850;font-size:clamp(17px,1.6vw,25px);line-height:1.1;letter-spacing:-.4px;font-style:italic;text-transform:uppercase;text-align:center;white-space:nowrap;transform:none}
