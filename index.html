@@ -518,6 +518,12 @@
 @media(max-width:620px){.curated-intro{padding:18px;margin:14px 0}.curated-intro p{font-size:12px}}
 @media print{.curated-intro{display:none!important}}
 </style><style>
+/* Explicit return path for review-confidence badge navigation. */
+.review-source-return{display:flex;align-items:center;gap:15px;flex-wrap:wrap;background:#f0f8f5;border:1px solid #c5ded5;border-radius:12px;padding:12px 15px;margin:0 0 21px}
+.review-source-return.hidden{display:none!important}
+.review-source-return button{padding:10px 14px;border:1px solid #8db8ad;background:#e4f4ed;color:#175d50;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer}
+.review-source-return button:hover{background:#d3e9e0}
+.review-source-return span{font-size:13px;color:#42665d}
 .review-confidence-link{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:100%;width:max-content;margin:7px 0 4px;padding:5px 8px;border:1px solid #b9ddcf;border-radius:9px;background:#edf8f2;color:#14674c;font-size:11px;font-weight:760;line-height:1.4;text-align:left;cursor:pointer;box-shadow:none}
 .review-confidence-link:hover,.review-confidence-link:focus-visible{border-color:#76b69b;background:#dff3e8}
 .review-confidence-check{display:inline-grid;place-items:center;flex:none;width:16px;height:16px;border-radius:50%;background:#167b5c;color:white;font-size:11px;font-weight:900}
@@ -670,7 +676,7 @@
 <div class="fmb-ratings-step"><div class="fmb-ratings-number">2</div><div><h3>How we find your match</h3><p>We consider your riding style, terrain, budget, equipment preferences, and priorities to identify the bikes best suited to you. Your <b>Match Score</b> reflects how well a bike fits your needs, not simply how highly we rate its performance.</p><p><b>Value matters too.</b> Your budget determines which builds are eligible. Separately, your bang-for-your-buck preference can raise or lower a bike's match score by comparing the price and estimated equipment level of an eligible build with similarly oriented bikes. Value-focused riders get a stronger adjustment; premium-focused riders get little or none. We don't automatically favor cheaper bikes or reward or penalize brands by name.</p><p>Value comparisons are approximate and depend on the build specifications and prices we have verified, so they're one input alongside ride performance and fit.</p><div class="fmb-score-example"><b>Same bike. Different riders. Different recommendations.</b><p class="fmb-score-example-intro">A bike can be an excellent match for one rider and less suitable for another.</p><div class="fmb-score-example-values"><div><span class="fmb-rider-label">Rider A</span><span>Prioritizes climbing, efficiency, and lighter weight</span><strong>9.5<small>/10</small></strong><span>Personalized match</span></div><div><span class="fmb-rider-label">Rider B</span><span>Prioritizes aggressive descending and bike parks</span><strong>7.8<small>/10</small></strong><span>Personalized match</span></div></div><p class="fmb-score-example-note">Illustrative scores for the same bike, based on different riding priorities.</p></div></div></div>
 <div class="fmb-ratings-step"><div class="fmb-ratings-number">3</div><div><h3>What “Well reviewed” means</h3><p><span class="fmb-rating-evidence"><span aria-hidden="true">✓</span> Well reviewed</span> indicates at least two independent, current-generation hands-on tests. It reflects the depth of independent evidence, not whether one bike is better than another.</p></div></div>
 <p class="fmb-ratings-note">Our ratings are informed editorial assessments, not laboratory measurements. Source links and audit notes appear under <button type="button" class="fmb-inline-link" data-tab="sources">Sources &amp; reviews</button>.</p>
-</div></section><section id="sourcesView" class="hidden"><div class="panel sources-page">
+</div></section><section id="sourcesView" class="hidden"><div class="panel sources-page"><div id="reviewSourceReturn" class="review-source-return hidden"><button type="button" id="reviewSourceBack">← Back to previous page</button><span id="reviewSourceContext"></span></div>
 <div class="sectionhead"><h2>Sources &amp; reviews</h2><span class="muted tiny">Evidence ledger · initial audit Nov 4, 2026</span></div>
 <p class="sources-intro">See which publications are linked to each bike, where our riding assessments came from, and what still needs independent verification. A link is not proof of a hands-on test or a current build. The review audit is underway.</p>
 <div class="sources-metrics"><div><strong id="sourcesBikeCount">48</strong><small>Bike models</small></div><div><strong id="sourcesLinkedCount">—</strong><small>Source references</small></div><div><strong id="sourcesPendingCount">—</strong><small>Still awaiting source audits</small></div></div>
@@ -1406,18 +1412,35 @@ function independentReviewBadge(b){
  if(grade!=='A'||!Number.isInteger(count)||count<2)return '';
  return '<button type="button" class="review-confidence-link" data-review-bike="'+esc(b.id)+'" title="Evidence: '+count+' independent current-generation hands-on ride tests. View sources."><span aria-hidden="true" class="review-confidence-check">✓</span><span>Well reviewed</span><span class="review-confidence-count">'+count+' independent tests</span></button>';
 }
+let reviewSourceReturn=null;
+function clearReviewSourceReturn(){
+ reviewSourceReturn=null;
+ document.getElementById('reviewSourceReturn')?.classList.add('hidden');
+}
 document.addEventListener('click',function(event){
  const trigger=event.target.closest('[data-review-bike]');
  if(!trigger)return;
  event.preventDefault();
  const bike=B.find(x=>x.id===trigger.dataset.reviewBike);
  if(!bike)return;
+ reviewSourceReturn={tab:activeTab,scrollY:window.scrollY,brand:comparisonBrandFilter};
  const search=document.getElementById('sourcesSearch');
  const filter=document.getElementById('sourcesType');
  if(filter)filter.value='all';
  if(search)search.value=bike.name;
+ const label=reviewSourceReturn.tab==='dashboard'?'Your Finalists':reviewSourceReturn.tab==='all'?(reviewSourceReturn.brand?'Explore '+reviewSourceReturn.brand+' Bikes':'Compare All Bikes'):'previous page';
+ document.getElementById('reviewSourceBack').textContent='← Back to '+label;
+ document.getElementById('reviewSourceContext').textContent='Review sources for '+bike.name;
+ document.getElementById('reviewSourceReturn').classList.remove('hidden');
  setTab('sources');
- document.getElementById('sourcesView')?.scrollIntoView({behavior:'smooth',block:'start'});
+ document.getElementById('sourcesView')?.scrollIntoView({behavior:'auto',block:'start'});
+});
+document.getElementById('reviewSourceBack').addEventListener('click',()=>{
+ const target=reviewSourceReturn;
+ if(!target)return;
+ clearReviewSourceReturn();
+ setTab(target.tab);
+ requestAnimationFrame(()=>window.scrollTo({top:target.scrollY,behavior:'auto'}));
 });
 
 /* Review summaries: only verified exact-generation findings are attributed to
@@ -2012,7 +2035,7 @@ function openLaunchPage(){forceWelcome=true;setTab('wizard');window.scrollTo({to
 $('homeBrand').addEventListener('click',openLaunchPage);
 $('homeBrand').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLaunchPage();}});
 function scrollToFinalists(){requestAnimationFrame(()=>{$('results').scrollIntoView({behavior:'auto',block:'start'});});}
-document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{if(el.dataset.tab==='wizard'){openLaunchPage();return;}if(el.dataset.tab==='all'&&comparisonBrandFilter){leaveBrandExplore(false);return;}setTab(el.dataset.tab);if(el.dataset.tab==='dashboard')scrollToFinalists();}));$('next').onclick=nextQuestion;$('back').onclick=prevQuestion;$('skip').onclick=()=>{if(['quiver','suspensionType','ride','focus','budget'].includes(qid))return;answers[qid]='none';nextQuestion();};$('fineTune').onclick=()=>{$('tuning').scrollIntoView({behavior:'smooth',block:'start'});};$('resetResults').onclick=()=>{if(!confirm('Clear this rider’s answers and previous results, and start over?'))return;resetForNewSearch();};$('resetWizard').onclick=()=>$('resetResults').click();
+document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{if(el.dataset.tab!=='sources')clearReviewSourceReturn();if(el.dataset.tab==='wizard'){openLaunchPage();return;}if(el.dataset.tab==='all'&&comparisonBrandFilter){leaveBrandExplore(false);return;}setTab(el.dataset.tab);if(el.dataset.tab==='dashboard')scrollToFinalists();}));$('next').onclick=nextQuestion;$('back').onclick=prevQuestion;$('skip').onclick=()=>{if(['quiver','suspensionType','ride','focus','budget'].includes(qid))return;answers[qid]='none';nextQuestion();};$('fineTune').onclick=()=>{$('tuning').scrollIntoView({behavior:'smooth',block:'start'});};$('resetResults').onclick=()=>{if(!confirm('Clear this rider’s answers and previous results, and start over?'))return;resetForNewSearch();};$('resetWizard').onclick=()=>$('resetResults').click();
 function makePrintableResults(){
   if(!finished){alert('Answer the questions and open Your Finalists first.');return;}
   const items=suitable().slice(0,3);
