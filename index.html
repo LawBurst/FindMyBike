@@ -50,6 +50,26 @@
 .fmb-brand-tile[data-brand="Yeti"] .fmb-brand-wordmark{letter-spacing:2px}
 @media(max-width:700px){.fmb-brand-tile{min-height:86px;padding:10px 8px}.fmb-brand-markbox{height:47px}.fmb-brand-wordmark{font-size:clamp(15px,3vw,21px)}.fmb-brand-tile[data-brand="Rocky Mountain"] .fmb-brand-wordmark{font-size:clamp(11px,2.2vw,16px)}.fmb-brand-tile[data-brand="Santa Cruz"] .fmb-brand-wordmark,.fmb-brand-tile[data-brand="Cannondale"] .fmb-brand-wordmark,.fmb-brand-tile[data-brand="Specialized"] .fmb-brand-wordmark,.fmb-brand-tile[data-brand="Transition"] .fmb-brand-wordmark{font-size:clamp(12px,2.7vw,18px)}}
 
+
+/* What reviewers say: evidence-aware summary panel */
+.review-open{display:inline-flex;align-items:center;gap:6px;margin:10px 0 6px;padding:8px 11px;border-radius:8px;border:1px solid #95bbb2;background:#edf8f4;color:#176559;font-size:12px;font-weight:800;cursor:pointer}
+.review-open:hover,.review-open:focus-visible{background:#dff3eb;border-color:#276e62}
+.review-open.tiny{margin:6px 0 0;padding:5px 8px;font-size:11px}
+.review-dialog{border:0;border-radius:16px;padding:0;width:min(680px,calc(100vw - 28px));max-height:85vh;box-shadow:0 20px 70px #0d242855;color:#20353a}
+.review-dialog::backdrop{background:#0d252cb0}
+.review-dialog-content{padding:22px 24px;max-height:85vh;overflow-y:auto}
+.review-dialog-head{display:flex;justify-content:space-between;align-items:start;gap:15px}
+.review-dialog h3{margin:0 0 8px;font-size:22px}
+.review-dialog h4{margin:18px 0 7px;font-size:14px}
+.review-dialog p,.review-dialog li{font-size:13px;line-height:1.6}
+.review-dialog li{margin:6px 0}
+.review-dialog ul{padding-left:21px;margin:5px 0}
+.review-dialog a{color:#17675e;overflow-wrap:anywhere}
+.review-dismiss{border:1px solid #d4dfdd;background:#f3f5f5;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:750}
+.review-disclosure{background:#f0f7f5;border-left:3px solid #529a89;padding:10px 12px;font-size:12px;line-height:1.5}
+.review-detail-meta{color:#697b7e;font-size:12px;margin:5px 0 14px}
+@media(max-width:600px){.review-dialog-content{padding:16px}.review-dialog h3{font-size:19px}}
+
 /* Questionnaire: reading-first, distraction-free layout */
 #wizardView .wizard-wrap{max-width:850px;margin:30px auto 0}
 #wizardView .wizard-panel{padding:40px 46px 33px;border:1px solid #d5e1e1;box-shadow:0 10px 40px rgba(16,58,55,.075);border-radius:22px}
@@ -1309,6 +1329,60 @@ document.addEventListener('click',function(event){
  setTab('sources');
  document.getElementById('sourcesView')?.scrollIntoView({behavior:'smooth',block:'start'});
 });
+
+/* Review summaries: only verified exact-generation findings are attributed to
+   publishers. Other bikes show clearly labeled provisional research notes. */
+const REVIEW_FINDINGS={
+ mach4:{
+  pros:[['Blister','Outstanding pedaling efficiency and race-ready handling.','https://blisterreview.com/gear-reviews/pivot-mach-4-sl-v4'],['Bikerumor','Technical descending capability exceeds what many riders expect from an XC racer.','https://bikerumor.com/four-months-one-big-race-pivot-mach-4-sl-long-term-review/']],
+  cons:[['N Minus One','Rider proportions can influence seated fit on climbs.','https://nminus1bikes.substack.com/p/pivot-mach-4-sl-mountain-bike-review']]},
+ ranger:{
+  pros:[['BIKEPACKING.com','Excellent efficiency on rolling terrain and technical climbs.','https://bikepacking.com/bikes/revel-ranger-v3-review/'],['NSMB','Strong suspension support for a short-travel bike on rugged descents.','https://nsmb.com/articles/revel-ranger/']],
+  cons:[['The Loam Wolf','The rear suspension can be sensitive to setup; certain steep climbs exposed uneven traction.','https://theloamwolf.com/reviews/bikes/revel-ranger/']]},
+ trailcat:{
+  pros:[['BikeRadar','Efficient pedaling and composed trail handling.','https://www.bikeradar.com/reviews/bikes/mountain-bikes/full-suspension-mountain-bikes/pivot-trailcat-lt-pro-x0-review']],
+  cons:[['ENDURO','Technical climbing sometimes demands deliberate front-wheel weighting.','https://enduro-mtb.com/en/the-best-trail-bike-mtb-review/pivot-trailcat-lt-pro-x0/']]},
+ scalpel:{
+  pros:[['Blister','Fast, lively race-bike acceleration and surprisingly confident technical handling.','https://blisterreview.com/gear-reviews/2024-cannondale-scalpel']],
+  cons:[['Pinkbike','XC-focused build and light equipment emphasize speed over rough-trail comfort.','https://www.pinkbike.com/news/review-cannondale-scalpel-1-fast-is-fun.html']]}
+};
+function reviewersButton(b,tiny=false){
+ return '<button class="review-open'+(tiny?' tiny':'')+'" type="button" data-review-summary="'+esc(b.id)+'">What reviewers say <span aria-hidden="true">↗</span></button>';
+}
+function reviewerSourceUrls(b){
+ const urls=[...(RESEARCH_V6[b.id]?.reviews||[]),...(b.researchV6?.reviewUrls||[])];
+ const maker=/(?:revelbikes|ibiscycles|pivotcycles|yeticycles|santacruzbicycles|scott-sports|specialized|canyon|transitionbikes|trekbikes|cannondale|orbea|bikes\.com|aribikes|alliedcycleworks)\.com/i;
+ return [...new Set(urls)].filter(u=>{try{const x=new URL(u);return x.protocol==='https:'&&!maker.test(x.hostname)}catch(e){return false}});
+}
+function showReviewSummary(id){
+ const b=B.find(x=>x.id===id);if(!b)return;
+ const d=$('reviewDialog'),audit=SOURCE_AUDIT_20261104[b.id];
+ const verified=(audit?.tier==='A'&&(VERIFIED_TEST_COUNTS[b.id]||0)>=2);
+ const findings=verified?REVIEW_FINDINGS[b.id]:null;
+ $('reviewDialogTitle').textContent='What Reviewers Say · '+b.name;
+ const line=([publisher,summary,url])=>'<li><b>'+esc(publisher)+':</b> '+esc(summary)+' <a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Read review ↗</a></li>';
+ let html='<p class="review-detail-meta">'+esc(b.generation||'Generation pending verification')+' · '+(verified?'Multiple independent current-generation tests':'Review verification incomplete')+'</p>';
+ if(findings){
+  html+='<div class="review-disclosure">Editorial paraphrases of the linked independent reviews, not direct quotes. Impressions may vary with build and setup.</div>';
+  html+='<h4>What reviewers liked</h4><ul>'+findings.pros.map(line).join('')+'</ul>';
+  html+='<h4>Criticisms and limitations</h4><ul>'+findings.cons.map(line).join('')+'</ul>';
+ }else{
+  html+='<div class="review-disclosure">Preliminary FindMyBike research, not an independently verified reviewer consensus. The review audit for this exact generation is still in progress.</div>';
+  const basis=RESEARCH_V6[b.id]?.basis||b.researchV6?.basis||b.notes||'Review research pending.';
+  html+='<h4>Current research notes</h4><p>'+esc(basis)+'</p><h4>Tradeoff worth examining</h4><p>'+esc(b.trade||'Insufficient independent ride-test evidence.')+'</p>';
+ }
+ if(audit?.note)html+='<h4>Evidence and differing impressions</h4><p>'+esc(audit.note)+'</p>';
+ const sources=reviewerSourceUrls(b);
+ html+='<h4>Independent source links</h4>';
+ html+=sources.length?'<ul>'+sources.slice(0,8).map(u=>'<li><a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(new URL(u).hostname.replace(/^www\./,''))+' ↗</a></li>').join('')+'</ul>':'<p>Exact-generation independent review links are not yet verified.</p>';
+ html+='<p class="review-detail-meta">FindMyBike climbing and descending scores are editorial estimates, not measured test data.</p>';
+ $('reviewDialogBody').innerHTML=html;
+ if(d.showModal)d.showModal();else d.setAttribute('open','');
+}
+document.addEventListener('click',e=>{const button=e.target.closest('[data-review-summary]');if(button){e.preventDefault();showReviewSummary(button.dataset.reviewSummary)}});
+$('dismissReview').addEventListener('click',()=>$('reviewDialog').close());
+$('reviewDialog').addEventListener('click',e=>{if(e.target===$('reviewDialog'))$('reviewDialog').close()});
+
 function comparisonCard(b){const review=contextualReview(b,[...suitable().slice(0,3),b]);
   const actual=scoreBike(b),v=displayBuild(b),choices=candidateBuilds(b);
   const eligible=!actual.unavailable;
@@ -1327,7 +1401,7 @@ function comparisonCard(b){const review=contextualReview(b,[...suitable().slice(
     }
   }
   const note=eligible?`Your choice ranks #${overall} of ${r.length} bikes based on your answers. ${reasons.slice(0,2).join(' · ')||'Compare its ride character and build options with your three recommended bikes.'}.`:'This bike has no complete build matching the current hard requirements. You can still view it and adjust your preferences.';
-  return `<article class="bikecard user-bike" data-bike-id="${esc(b.id)}">${bikePhoto(b)}<div class="bikebody"><div class="between"><span class="label">YOUR CHOICE · #${overall} OVERALL</span><span class="score">${scoreText}<small>/10 ride + preferences</small></span></div><h3>${esc(b.name)}</h3>${independentReviewBadge(b)}<div class="metadata">${b.hardtail?'Hardtail · '+b.f+'mm fork':b.r+'mm rear / '+b.f+'mm front'} · ${weightText(b)}</div><div class="extra-bike-switcher"><label for="switchExtraBike">Compare a different bike</label><select id="switchExtraBike" aria-label="Change your comparison bike"><option value="${esc(b.id)}">${esc(b.name)} (current)</option>${fourthBikeOptions().filter(x=>x.id!==b.id).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select><button class="btn" type="button" data-remove-extra>Reset my choice</button></div><div class="value-summary"><span><b>Ride fit</b> ${actual.rideMatch?.toFixed(1)||"—"}/10</span><span><b>Equipment value</b> <em data-value-score style="font-style:normal">${v?equipmentValue(b,v).toFixed(1)+"/10":"—"}</em></span></div><div class="metricrow"><div><b>${b.cl.toFixed(1)}</b><small>Climbing</small></div><div><b>${b.de.toFixed(1)}</b><small>Descending</small></div><div><b>${b.cool.toFixed(1)}</b><small>Cool factor</small></div></div><div class="extra-context"><b>How it compares:</b> ${esc(note)}</div><div class="why"><b>Ride character:</b> ${esc(review.character)}</div><div class="research-note"><b>Evidence:</b> ${esc(b.researchV6?.grade||"Provisional")} · ${esc(b.generation||"generation pending")} · ${esc(b.researchV6?.basis||"")}</div><div class="why"><b>Why it fits you:</b> ${esc(review.why)}</div><div class="why"><b>Tradeoff for you:</b> ${esc(review.trade)}</div>${sourceLinks(b)}${v?buildPanel(b,v,choices):'<div class="build-panel"><b>No eligible complete build under your current requirements.</b><span class="metadata">Change requirements in Fine-tune to unlock builds.</span></div>'}<p class="note">*${Number.isFinite(b.w)?'Reference weight: '+esc(b.wNote)+'; selected build can differ.':'Weight not yet verified for a comparable complete build.'}</p></div></article>`;
+  return `<article class="bikecard user-bike" data-bike-id="${esc(b.id)}">${bikePhoto(b)}<div class="bikebody"><div class="between"><span class="label">YOUR CHOICE · #${overall} OVERALL</span><span class="score">${scoreText}<small>/10 ride + preferences</small></span></div><h3>${esc(b.name)}</h3>${independentReviewBadge(b)}${reviewersButton(b)}<div class="metadata">${b.hardtail?'Hardtail · '+b.f+'mm fork':b.r+'mm rear / '+b.f+'mm front'} · ${weightText(b)}</div><div class="extra-bike-switcher"><label for="switchExtraBike">Compare a different bike</label><select id="switchExtraBike" aria-label="Change your comparison bike"><option value="${esc(b.id)}">${esc(b.name)} (current)</option>${fourthBikeOptions().filter(x=>x.id!==b.id).map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select><button class="btn" type="button" data-remove-extra>Reset my choice</button></div><div class="value-summary"><span><b>Ride fit</b> ${actual.rideMatch?.toFixed(1)||"—"}/10</span><span><b>Equipment value</b> <em data-value-score style="font-style:normal">${v?equipmentValue(b,v).toFixed(1)+"/10":"—"}</em></span></div><div class="metricrow"><div><b>${b.cl.toFixed(1)}</b><small>Climbing</small></div><div><b>${b.de.toFixed(1)}</b><small>Descending</small></div><div><b>${b.cool.toFixed(1)}</b><small>Cool factor</small></div></div><div class="extra-context"><b>How it compares:</b> ${esc(note)}</div><div class="why"><b>Ride character:</b> ${esc(review.character)}</div><div class="research-note"><b>Evidence:</b> ${esc(b.researchV6?.grade||"Provisional")} · ${esc(b.generation||"generation pending")} · ${esc(b.researchV6?.basis||"")}</div><div class="why"><b>Why it fits you:</b> ${esc(review.why)}</div><div class="why"><b>Tradeoff for you:</b> ${esc(review.trade)}</div>${sourceLinks(b)}${v?buildPanel(b,v,choices):'<div class="build-panel"><b>No eligible complete build under your current requirements.</b><span class="metadata">Change requirements in Fine-tune to unlock builds.</span></div>'}<p class="note">*${Number.isFinite(b.w)?'Reference weight: '+esc(b.wNote)+'; selected build can differ.':'Weight not yet verified for a comparable complete build.'}</p></div></article>`;
 }
 function extraEmptyCard(){
   const available=fourthBikeOptions();
@@ -1435,7 +1509,7 @@ function showResults(){
   const cards=top.map((b,i)=>{
     const v=displayBuild(b),choices=candidateBuilds(b);
     const review=contextualReview(b,comparisons);const good=[b.hardtail?'Hardtail · no rear shock':null,b.cl>=9?'Excellent climbing':null,b.de>=9?'Strong descending':null,Number.isFinite(b.w)&&b.w<28?'Lightweight reference build':null,b.cool>=9.2?'Cool factor':null].filter(Boolean);
-    return `<article class="bikecard" data-bike-id="${esc(b.id)}">${bikePhoto(b)}<div class="bikebody"><div class="between"><span class="label">FINALIST</span><span class="score">${b.match.toFixed(1)}<small>/10 ride + preferences</small></span></div><h3>${esc(b.name)}</h3>${independentReviewBadge(b)}<div class="metadata">${b.hardtail?'Hardtail · '+b.f+'mm fork':b.r+'mm rear / '+b.f+'mm front'} · ${weightText(b)}</div><div class="value-summary"><span><b>Ride fit</b> ${b.rideMatch.toFixed(1)}/10</span><span><b>Equipment value</b> <em data-value-score style="font-style:normal">${v?equipmentValue(b,v).toFixed(1)+"/10":"—"}</em></span></div><div class="metricrow"><div><b>${b.cl.toFixed(1)}</b><small>Climbing</small></div><div><b>${b.de.toFixed(1)}</b><small>Descending</small></div><div><b>${b.cool.toFixed(1)}</b><small>Cool factor</small></div></div><div class="why"><b>Ride character:</b> ${esc(review.character)}</div><div class="why"><b>Why it fits you:</b> ${esc(review.why)}</div><div class="why"><b>Tradeoff for you:</b> ${esc(review.trade)}</div><div class="summarytags">${good.map(g=>'<span>'+g+'</span>').join('')}</div>${v?buildPanel(b,v,choices):''}<p class="note">*Weight from ${esc(b.wNote)}, not necessarily selected build.</p></div></article>`;
+    return `<article class="bikecard" data-bike-id="${esc(b.id)}">${bikePhoto(b)}<div class="bikebody"><div class="between"><span class="label">FINALIST</span><span class="score">${b.match.toFixed(1)}<small>/10 ride + preferences</small></span></div><h3>${esc(b.name)}</h3>${independentReviewBadge(b)}${reviewersButton(b)}<div class="metadata">${b.hardtail?'Hardtail · '+b.f+'mm fork':b.r+'mm rear / '+b.f+'mm front'} · ${weightText(b)}</div><div class="value-summary"><span><b>Ride fit</b> ${b.rideMatch.toFixed(1)}/10</span><span><b>Equipment value</b> <em data-value-score style="font-style:normal">${v?equipmentValue(b,v).toFixed(1)+"/10":"—"}</em></span></div><div class="metricrow"><div><b>${b.cl.toFixed(1)}</b><small>Climbing</small></div><div><b>${b.de.toFixed(1)}</b><small>Descending</small></div><div><b>${b.cool.toFixed(1)}</b><small>Cool factor</small></div></div><div class="why"><b>Ride character:</b> ${esc(review.character)}</div><div class="why"><b>Why it fits you:</b> ${esc(review.why)}</div><div class="why"><b>Tradeoff for you:</b> ${esc(review.trade)}</div><div class="summarytags">${good.map(g=>'<span>'+g+'</span>').join('')}</div>${v?buildPanel(b,v,choices):''}<p class="note">*Weight from ${esc(b.wNote)}, not necessarily selected build.</p></div></article>`;
   });
   const extra=fourthSelection();
   // If a user choice later enters the automated top three after tuning, avoid duplicate cards.
@@ -1498,7 +1572,7 @@ function allTable(){
     const diff=typeof av==='string'?av.localeCompare(bv):(av-bv);
     return (dir==='asc'?diff:-diff)||positions.get(a.id)-positions.get(b.id);
   });
-  $('allRows').innerHTML=rows.map(b=>`<tr><td>${positions.get(b.id)+1}</td><td><b>${esc(b.name)}</b>${independentReviewBadge(b)}<div class="audit-table-text">${esc(b.generation||"Current")} · ${esc(b.evidence||"Review pending")}</div></td><td>${b.hardtail?'Hardtail · ':''}${compareCategoryLabels[b.cat]||b.cat}</td><td class="numeric">${b.f}/${b.hardtail?'HT':b.r}</td><td class="numeric">${weightText(b)}</td><td class="numeric">${b.cl.toFixed(1)}</td><td class="numeric">${b.de.toFixed(1)}</td><td class="numeric">${b.cool.toFixed(1)}</td><td class="numeric">${comparisonBasePrice(b)!=null?money(comparisonBasePrice(b)):'—'}</td><td class="numeric"><b>${b.unavailable?'—':b.match.toFixed(1)}</b></td></tr>`).join('');
+  $('allRows').innerHTML=rows.map(b=>`<tr><td>${positions.get(b.id)+1}</td><td><b>${esc(b.name)}</b>${independentReviewBadge(b)}${reviewersButton(b,true)}<div class="audit-table-text">${esc(b.generation||"Current")} · ${esc(b.evidence||"Review pending")}</div></td><td>${b.hardtail?'Hardtail · ':''}${compareCategoryLabels[b.cat]||b.cat}</td><td class="numeric">${b.f}/${b.hardtail?'HT':b.r}</td><td class="numeric">${weightText(b)}</td><td class="numeric">${b.cl.toFixed(1)}</td><td class="numeric">${b.de.toFixed(1)}</td><td class="numeric">${b.cool.toFixed(1)}</td><td class="numeric">${comparisonBasePrice(b)!=null?money(comparisonBasePrice(b)):'—'}</td><td class="numeric"><b>${b.unavailable?'—':b.match.toFixed(1)}</b></td></tr>`).join('');
   document.querySelectorAll('.comps th[data-sort]').forEach(th=>{
     const active=th.dataset.sort===key;
     th.setAttribute('aria-sort',active?(dir==='asc'?'ascending':'descending'):'none');
@@ -1725,4 +1799,5 @@ document.getElementById('geometryTab').addEventListener('click',()=>showCompareP
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate()});
   setInterval(checkForUpdate,180000);
 })();
-</script></body></html>
+</script><dialog id="reviewDialog" class="review-dialog" aria-labelledby="reviewDialogTitle"><div class="review-dialog-content"><div class="review-dialog-head"><h3 id="reviewDialogTitle">What Reviewers Say</h3><button id="dismissReview" class="review-dismiss" type="button" aria-label="Close review panel">Close ×</button></div><div id="reviewDialogBody"></div></div></dialog>
+</body></html>
