@@ -1434,30 +1434,19 @@ function independentReviewBadge(b){
  const grade=SOURCE_AUDIT_20261104[b.id]?.tier;
  const count=VERIFIED_TEST_COUNTS[b.id];
  if(grade!=='A'||!Number.isInteger(count)||count<2)return '';
- return '<button type="button" class="review-confidence-link" data-review-bike="'+esc(b.id)+'" title="Evidence: '+count+' independent current-generation hands-on ride tests. View sources."><span aria-hidden="true" class="review-confidence-check">✓</span><span>Well reviewed</span><span class="review-confidence-count">'+count+' independent tests</span></button>';
+ return '<button type="button" class="review-confidence-link" data-review-bike="'+esc(b.id)+'" title="Evidence: '+count+' independent current-generation hands-on ride tests. Open review summary."><span aria-hidden="true" class="review-confidence-check">✓</span><span>Well reviewed</span><span class="review-confidence-count">'+count+' independent tests</span></button>';
 }
 let reviewSourceReturn=null;
 function clearReviewSourceReturn(){
  reviewSourceReturn=null;
  document.getElementById('reviewSourceReturn')?.classList.add('hidden');
 }
+/* Well Reviewed opens evidence in the existing review modal instead of navigating away. */
 document.addEventListener('click',function(event){
  const trigger=event.target.closest('[data-review-bike]');
  if(!trigger)return;
  event.preventDefault();
- const bike=B.find(x=>x.id===trigger.dataset.reviewBike);
- if(!bike)return;
- reviewSourceReturn={tab:activeTab,scrollY:window.scrollY,brand:comparisonBrandFilter};
- const search=document.getElementById('sourcesSearch');
- const filter=document.getElementById('sourcesType');
- if(filter)filter.value='all';
- if(search)search.value=bike.name;
- const label=reviewSourceReturn.tab==='dashboard'?'Your Finalists':reviewSourceReturn.tab==='all'?(reviewSourceReturn.brand?'Explore '+reviewSourceReturn.brand+' Bikes':'Compare All Bikes'):'previous page';
- document.getElementById('reviewSourceBack').textContent='← Back to '+label;
- document.getElementById('reviewSourceContext').textContent='Review sources for '+bike.name;
- document.getElementById('reviewSourceReturn').classList.remove('hidden');
- setTab('sources');
- document.getElementById('sourcesView')?.scrollIntoView({behavior:'auto',block:'start'});
+ showReviewConfidence(trigger.dataset.reviewBike);
 });
 document.getElementById('reviewSourceBack').addEventListener('click',()=>{
  const target=reviewSourceReturn;
@@ -1698,6 +1687,33 @@ const RIDER_REVIEW_SUMMARIES={
 "signalpeak3":["Low-weight 110/120 mm platform emphasizes efficient pedaling.","Responsive on XC terrain with modest additional technical-trail capability.","Less descending reserve than longer-travel downcountry bikes; exact-generation consensus pending.","A value-oriented XC choice centered on efficient mileage and practical builds."],
 "lasalpeak2":["Reasonable pedaling for 170 mm enduro travel, not a mileage-first machine.","Long-travel suspension and 29-inch wheels prioritize difficult descents.","Heavier builds feel less lively; far more bike than required for easy trails.","A high-value enduro bike for riders who prioritize travel and equipment over XC sharpness."]
 };
+/* Concise independent-review confidence popup; full audit remains in Sources & Reviews. */
+function showReviewConfidence(id){
+ const b=B.find(x=>x.id===id);if(!b)return;
+ const grade=SOURCE_AUDIT_20261104[id]?.tier;
+ const count=VERIFIED_TEST_COUNTS[id]||0;
+ if(grade!=='A'||count<2)return;
+ const d=$('reviewDialog');
+ const summaries=REVIEW_COVERAGE_20261105[id]?.notes||RIDER_REVIEW_SUMMARIES[id]||[];
+ // Audited sources first. A link is not necessarily an independent test,
+ // so do not infer the verified count from the number of links.
+ const audited=REVIEW_AUDIT_ADDITIONAL_SOURCES_20261105[id]||[];
+ const sources=[...new Set([...audited,...reviewerSourceUrls(b)])]
+   .filter(u=>{try{return new URL(u).protocol==='https:';}catch(e){return false;}});
+ const host=u=>{try{return new URL(u).hostname.replace(/^www\\./,'');}catch(e){return 'Review source';}};
+ $('reviewDialogTitle').textContent='Well reviewed · '+b.name;
+ let html='<p class="review-detail-meta"><b>✓ Well reviewed</b> · '+count+' independently conducted current-generation ride tests</p>';
+ html+='<p class="review-disclosure">The Well Reviewed label measures the depth of independent testing, not a guarantee of positive ratings. FindMyBike considers both praise and criticism.</p>';
+ if(summaries.length>=3){
+  html+='<h4>Review consensus</h4><p>'+esc(summaries[0])+' '+esc(summaries[1])+'</p>';
+  html+='<h4>Common criticisms</h4><p>'+esc(summaries[2])+'</p>';
+ }
+ html+='<h4>Independent reviews</h4>';
+ html+=sources.length?'<ul class="review-confidence-sources">'+sources.slice(0,6).map(u=>'<li><a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(host(u))+' ↗</a></li>').join('')+'</ul>':'<p>Links are available in Sources & Reviews.</p>';
+ html+='<p class="review-detail-meta">For audit methodology, source verification and scoring notes, see the Sources & Reviews page.</p>';
+ $('reviewDialogBody').innerHTML=html;
+ if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');
+}
 function showReviewSummary(id){
  const b=B.find(x=>x.id===id);if(!b)return;
  const d=$('reviewDialog'),audit=SOURCE_AUDIT_20261104[b.id];
