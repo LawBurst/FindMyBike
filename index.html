@@ -1661,7 +1661,7 @@ function reviewersButton(b,tiny=false){
  const linked=reviewerSourceUrls(b).length>0;
  const count=VERIFIED_TEST_COUNTS[b.id]||0;
  const verified=SOURCE_AUDIT_20261104[b.id]?.tier==='A'&&count>=2;
- const label=linked?'Reviews & evidence':'Bike research notes';
+ const label=(verified||linked)?'Reviews & evidence':'Bike research notes';
  const verifiedTag=verified?'<span class="review-combined-count"><span aria-hidden="true">✓</span> '+count+' independent tests</span>':'';
  return '<button class="review-open review-combined'+(tiny?' tiny':'')+'" type="button" data-review-summary="'+esc(b.id)+'"><span>'+label+' <span aria-hidden="true">↗</span></span>'+verifiedTag+'</button>';
 }
