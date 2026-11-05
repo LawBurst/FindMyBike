@@ -1656,6 +1656,7 @@ function showReviewSummary(id){
  const d=$('reviewDialog'),audit=SOURCE_AUDIT_20261104[b.id];
  const count=VERIFIED_TEST_COUNTS[b.id]||0;
  const verified=audit?.tier==='A'&&count>=2;
+ const coverage=REVIEW_COVERAGE_20261105[b.id],urls=reviewerSourceUrls(b);
  const summaries=coverage?.notes||RIDER_REVIEW_SUMMARIES[b.id]||[
   b.notes||'Pedaling performance is still being evaluated.',
   'Current-generation descending characteristics need independent verification.',
@@ -1663,7 +1664,6 @@ function showReviewSummary(id){
   'A preliminary catalog entry; further independent testing is required.'
  ];
  const labels=['Climbing','Descending','Criticisms','Overall'];
- const coverage=REVIEW_COVERAGE_20261105[b.id],urls=reviewerSourceUrls(b);
  $('reviewDialogTitle').textContent=(urls.length?'What Reviewers Say':'Bike Research Notes')+' · '+b.name;
  let html='<p class="review-detail-meta">'+esc(b.generation||'Current generation not yet independently confirmed')+' · '+(coverage?esc(coverage.type)+' · '+esc(coverage.match):verified?count+' independent current-generation tests recorded':urls.length?'Review linked; current-generation evidence audit pending':'No independent hands-on review linked')+'</p>';
  html+='<div class="review-disclosure">'+(coverage?'FindMyBike paraphrases informed by the linked '+esc(coverage.type.toLowerCase())+'. '+(coverage.type.includes('Older')||coverage.type.includes('first ride')?'Generation or test-depth caveats apply. ':'')+'These are not direct quotations or a multi-review consensus.':verified?'These are FindMyBike editorial summaries of independent ride testing, not direct quotations.':urls.length?'Independent review links are available, but the summary may combine editorial interpretation with limited tested evidence. Not reviewer quotations.':'No independent test is linked for this bike. The following is FindMyBike’s preliminary model assessment, not what reviewers said.')+'</div>';
