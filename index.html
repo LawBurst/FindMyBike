@@ -1257,6 +1257,15 @@ function buildValueAdjustment(b){
  const relative=median-adjustedCost(selected);
  return Math.max(-.65,Math.min(.65,relative*1.1))*emphasis;
 }
+// Independent current-generation ride-test confidence only. Critical reviews already
+// affect climbing/descending ratings; absence of reviews is NOT a negative review.
+function reviewEvidenceAdjustment(b){
+ const tier=SOURCE_AUDIT_20261104[b.id]?.tier;
+ const tests=VERIFIED_TEST_COUNTS[b.id]||0;
+ if(tier==='A'&&tests>=2)return 0.20;
+ if(tier==='B')return 0.05;
+ return 0;
+}
 function scoreComponents(b,ignoreBrand=false){
  const p=state.priority,r=state.ride;
  const targetByRide={xc:118,dc:125,trail:143,enduro:165,mixed:137};
@@ -1293,11 +1302,12 @@ function scoreComponents(b,ignoreBrand=false){
    travel:.58*5*(6.3+3.6*catFit)/sum+roleAdjustment,
    terrain:.58*(terrain+feel+impact+park+oneBikePenalty+htImpact),
    brand:brandAdj,
-   value:buildValueAdjustment(b)
+   value:buildValueAdjustment(b),
+   reviews:reviewEvidenceAdjustment(b)
  };
- const rideRaw=Object.entries(points).filter(([key])=>key!=='brand'&&key!=='value').reduce((total,[,value])=>total+value,0);
+ const rideRaw=Object.entries(points).filter(([key])=>!['brand','value','reviews'].includes(key)).reduce((total,[,value])=>total+value,0);
  const rideClamped=Math.max(1,Math.min(9.8,rideRaw));
- const combined=rideClamped+brandAdj+points.value;
+ const combined=rideClamped+brandAdj+points.value+points.reviews;
  const finalClamped=Math.max(1,Math.min(10,combined));
  points.cap=(rideClamped-rideRaw)+(finalClamped-combined);
  return {points,raw:finalClamped,rideMatch:rideClamped,match:Math.round(finalClamped*10)/10,catFit};
@@ -1311,13 +1321,13 @@ function scoreBike(b,ignoreBrand=false){
 }
 // Use the exact same formula to expose the weighting, rather than hardcoding
 // an illustrative explanation that could disagree with the recommendation.
-const SCORE_ROWS=[['climbing','Climbing'],['descending','Descending'],['weight','Reference weight'],['agility','Agility / handling'],['design','Cool factor'],['travel','Travel & bike role'],['terrain','Terrain / park / ride feel'],['brand','Brand preference'],['value','Build value for money'],['baseline','Common score baseline'],['cap','Score limit adjustment']];
+const SCORE_ROWS=[['climbing','Climbing'],['descending','Descending'],['weight','Reference weight'],['agility','Agility / handling'],['design','Cool factor'],['travel','Travel & bike role'],['terrain','Terrain / park / ride feel'],['brand','Brand preference'],['value','Build value for money'],['reviews','Independent review confidence'],['baseline','Common score baseline'],['cap','Score limit adjustment']];
 function scoreBreakdownHTML(top){
  if(!top.length)return '';
  const data=top.map(b=>scoreComponents(b));
  const fmt=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(2)}`;
  const rows=SCORE_ROWS.filter(([k])=>k==='baseline'||data.some(d=>Math.abs(d.points[k])>.0001));
- return `<details class="score-explainer"><summary>Why these bikes scored differently <span class="explain-arrow">▾</span></summary><div class="score-explainer-body"><p>The figures below are <b>actual contributions</b> to each model’s final score, computed from your answers. A positive contribution does not necessarily mean that bike beats another; compare across columns. The value contribution compares eligible build price and equipment with similar-travel bikes. The common baseline and score-limit adjustment are part of the scoring formula.</p><div class="score-table-scroll"><table class="score-breakdown-table"><thead><tr><th>Score contribution</th>${top.map(b=>`<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(([k,label])=>`<tr><td>${label}</td>${data.map(d=>`<td>${fmt(d.points[k])}</td>`).join('')}</tr>`).join('')}<tr class="score-total"><td>Final score</td>${top.map(b=>`<td>${b.match.toFixed(1)}/10</td>`).join('')}</tr></tbody></table></div><p>Geometry informs the editorial ride ratings where reviewed, but is not a separate scoring input. Weight is a representative build, not necessarily your selected build. Scores are not measured probabilities.</p></div></details>`;
+ return `<details class="score-explainer"><summary>Why these bikes scored differently <span class="explain-arrow">▾</span></summary><div class="score-explainer-body"><p>The figures below are <b>actual contributions</b> to each model’s final score, computed from your answers. A positive contribution does not necessarily mean that bike beats another; compare across columns. The value contribution compares eligible build price and equipment with similar-travel bikes. Review confidence adds up to 0.20 points for independently tested current-generation bikes, but unreviewed bikes receive no penalty. Criticisms affect ride ratings only when independently substantiated. The common baseline and score-limit adjustment are part of the scoring formula.</p><div class="score-table-scroll"><table class="score-breakdown-table"><thead><tr><th>Score contribution</th>${top.map(b=>`<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(([k,label])=>`<tr><td>${label}</td>${data.map(d=>`<td>${fmt(d.points[k])}</td>`).join('')}</tr>`).join('')}<tr class="score-total"><td>Final score</td>${top.map(b=>`<td>${b.match.toFixed(1)}/10</td>`).join('')}</tr></tbody></table></div><p>Geometry informs the editorial ride ratings where reviewed, but is not a separate scoring input. Weight is a representative build, not necessarily your selected build. Scores are not measured probabilities.</p></div></details>`;
 }
 function closeMatchHTML(top){
  if(top.length<2)return '';
@@ -1994,10 +2004,11 @@ function updateWelcomeActions(){
  const saved=getCompleted();
  $('resumeActions').classList.toggle('hidden',!progress&&!saved);
  $('resumeSearch').hidden=!progress;
- $('previousResults').hidden=!saved;
+ $('previousResults').hidden=!saved||finished;
  $('startFinding').classList.toggle('hidden',!!progress||!!saved);
  const count=Math.max(1,history.length+1),total=guidedOrder().length;
- $('resumeSearch').textContent=finished?'View current finalists':'Continue previous search';
+ $('resumeSearch').textContent=finished?'View my finalists':'Continue my search';
+ $('previousResults').textContent='View last completed search';
  $('resumeSummary').textContent=finished?'Your completed bike search is saved on this device.':progress?'Your previous answers are saved. Question '+count+' of '+total+'.':'Your previous bike finalists are saved on this device.';
 }
 function showWizardStage(){
@@ -2007,9 +2018,7 @@ function showWizardStage(){
  if(welcome)updateWelcomeActions();else questionShow();
 }
 function resetForNewSearch(){
- // "Start new" and "Start over" must also clear the previous-results
- // shortcut, otherwise the next visit misleadingly offers the old search.
- try{localStorage.removeItem(completedKey);}catch(e){}
+ // Preserve the last completed search so an unfinished new search can revisit it.
  state=defaults();answers={};history=[];qid='quiver';finished=false;
  forceWelcome=false;welcomeDismissed=true;
  $('results').classList.add('hidden');
