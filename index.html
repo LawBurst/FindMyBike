@@ -70,6 +70,13 @@
 .review-detail-meta{color:#697b7e;font-size:12px;margin:5px 0 14px}
 @media(max-width:600px){.review-dialog-content{padding:16px}.review-dialog h3{font-size:19px}}
 
+
+/* Uniform SVG questionnaire icons instead of ambiguous Unicode glyphs. */
+#wizardView .choice .sym{display:flex;align-items:center;justify-content:center;width:34px;min-width:34px;height:34px;flex-shrink:0}
+#wizardView .choice .sym svg{width:26px;height:26px;display:block;stroke:currentColor}
+.choice-brand-initial{font-size:15px;letter-spacing:-.5px;font-weight:850;line-height:1}
+@media(max-width:620px){#wizardView .choice .sym{width:25px;min-width:25px;height:25px}#wizardView .choice .sym svg{width:22px;height:22px}.choice-brand-initial{font-size:12px}}
+
 /* Questionnaire: reading-first, distraction-free layout */
 #wizardView .wizard-wrap{max-width:850px;margin:30px auto 0}
 #wizardView .wizard-panel{padding:40px 46px 33px;border:1px solid #d5e1e1;box-shadow:0 10px 40px rgba(16,58,55,.075);border-radius:22px}
@@ -1077,7 +1084,70 @@ fork:{title:'Suspension brand preference?',sub:'Preferred brand for fork and rea
 brake:{title:'Brake brand preference?',sub:'The specific brake model may vary within one bike lineup.',choices:[['SRAM','SRAM','Prefer SRAM brakes','S'],['Shimano','Shimano','Prefer Shimano brakes','SH'],['other','Other','Prefer another brake brand','+'],['none','No preference','Open to all','✓']]},
 frame:{title:'Frame material preference?',sub:'Most candidates are carbon; Canyon Neuron, Transition Smuggler and Trek Fuel EX have aluminum options.',choices:[['carbon','Carbon','My first choice','◇'],['aluminum','Aluminum','My first choice','⬡'],['none','No preference','Either works','✓']]},
 brand:{title:'Any bike brands you especially like or dislike?',sub:'Choose up to 3 favorites and any brands you would rather avoid. All bikes remain eligible.',choices:[]}
-};const prefQs=['drive','shift','wheel','fork','brake','frame','brand'];const optionalQs=['tech','feel','weight','cool','value',...prefQs];
+};
+/* Consistent semantic choice icons, bundled locally (no external icon fonts).
+   Brand initials remain text because they identify an actual choice. */
+const CHOICE_ICON_PATHS={
+ bike:'<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="m15 6 2 3h3M9 6h4l-3 7 3.5 4.5M5.5 17.5 10 10 18.5 17.5"/>',
+ layers:'<path d="m12 2 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5"/>',
+ repeat:'<path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/>',
+ help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 4M12 17h.01"/>',
+ gauge:'<path d="M12 14l4-4M4.5 18a9 9 0 1 1 15 0M5 18h14M12 6v2M5.6 11l1.8 1M18.4 11l-1.8 1"/>',
+ mountain:'<path d="m3 20 7-12 4 7 2-3 5 8H3Z"/><path d="m8 11 2 2 2-2"/>',
+ arrowDown:'<path d="M12 3v17m-7-7 7 7 7-7"/>',
+ arrowUp:'<path d="M12 21V4m-7 7 7-7 7 7"/>',
+ balance:'<path d="M12 3v18M5 7h14M5 7 2 13h6L5 7Zm14 0-3 6h6l-3-6ZM8 21h8"/>',
+ compass:'<circle cx="12" cy="12" r="9"/><path d="m15 9-2 4-4 2 2-4 4-2Z"/>',
+ route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a4 4 0 0 0 0-8H9a3 3 0 0 1 0-6h7"/>',
+ mountainSnow:'<path d="m2 20 8-15 4 8 2-3 6 10H2ZM7 11l3 2 2-2"/>',
+ activity:'<path d="M2 12h4l3-8 5 16 3-8h5"/>',
+ feather:'<path d="M20 4c-5-2-10 1-13 7L3 21l9-4c6-3 9-8 8-13ZM3 21 15 9"/>',
+ waves:'<path d="M2 8c3-3 5-3 8 0s5 3 8 0 4-3 4-3M2 16c3-3 5-3 8 0s5 3 8 0 4-3 4-3"/>',
+ rocks:'<path d="m2 20 4-9 5-2 5 4 6 7H2ZM10 9l3-5 5 4-2 5"/>',
+ shield:'<path d="M12 2 4 6v6c0 5 3 8 8 10 5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/>',
+ sparkles:'<path d="m12 3 2 7 7 2-7 2-2 7-2-7-7-2 7-2 2-7ZM19 2v4M17 4h4"/>',
+ anchor:'<path d="M12 3v17M8 7h8M5 14a7 7 0 0 0 14 0M5 14l-2 2M19 14l2 2"/><circle cx="12" cy="3" r="1"/>',
+ star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.3-6.2 3.3L7 14.2l-5-4.9 6.9-1L12 2Z"/>',
+ dollar:'<path d="M12 2v20M17 6c-2-2-8-2-10 1-3 4 2 5 5 5s8 2 5 6c-2 3-8 3-10 1"/>',
+ check:'<path d="m4 12 5 5L20 6"/>',
+ bolt:'<path d="m13 2-9 12h7l-1 8 10-12h-7l0-8Z"/>',
+ cable:'<path d="M8 2v7M16 2v7M7 9h10v5a5 5 0 0 1-10 0V9ZM12 19v3"/>',
+ circle:'<circle cx="12" cy="12" r="9"/>',
+ wheel:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M12 3v7m0 4v7M3 12h7m4 0h7m-15-6 5 5m2 2 5 5m0-12-5 5m-2 2-5 5"/>',
+ frame:'<path d="M3 18 9 7h8l4 11H3ZM9 7l5 11m-11 0 10-9"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ minus:'<path d="M5 12h14"/>',
+ list:'<path d="M9 6h12M9 12h12M9 18h12M3 6h.01M3 12h.01M3 18h.01"/>',
+ chair:'<path d="M4 12h16M6 12V6a6 6 0 0 1 12 0v6M6 12v7m12-7v7"/>',
+ suspension:'<path d="M5 2v20M19 2v20M5 5h14M5 19h14M9 7l6 3-6 4 6 3"/>'
+};
+const CHOICE_ICONS={
+ suspensionType:{either:'layers',full:'suspension',hardtail:'frame'},
+ quiver:{one:'bike',two:'layers',three:'list',replace:'repeat',unsure:'help'},
+ existing:{xc:'gauge',trail:'route',enduro:'mountain',mixed:'layers'},
+ role:{xc:'gauge',trail:'compass',enduro:'mountain',mixed:'layers'},
+ features:{none:'minus',small:'route',large:'mountain'},
+ park:{never:'bike',sometimes:'mountain',often:'arrowDown'},
+ ride:{xc:'gauge',dc:'mountainSnow',trail:'route',enduro:'arrowDown',mixed:'compass'},
+ focus:{climb:'arrowUp',balanced:'balance',descend:'arrowDown',light:'feather'},
+ tech:{smooth:'waves',mixed:'route',rough:'rocks',extreme:'shield'},
+ feel:{playful:'sparkles',balanced:'balance',stable:'anchor'},
+ weight:{low:'minus',medium:'balance',high:'feather'},
+ cool:{low:'minus',medium:'sparkles',high:'star'},
+ value:{value:'dollar',balanced:'balance',premium:'star'},
+ shift:{electronic:'bolt',mechanical:'cable',none:'check'},
+ wheel:{carbon:'wheel',aluminum:'wheel',none:'check'},
+ frame:{carbon:'frame',aluminum:'frame',none:'check'},
+ drive:{none:'check'},fork:{none:'check'},brake:{other:'plus',none:'check'}
+};
+function questionChoiceIcon(question,value,label){
+ // Brand initials are intentionally explicit rather than abstract icons.
+ if(['SRAM','Shimano','Fox','RockShox'].includes(value))return '<span class="choice-brand-initial">'+(value==='Shimano'?'SH':value==='RockShox'?'RS':value==='SRAM'?'S':'F')+'</span>';
+ const key=CHOICE_ICONS[question]?.[value]||'circle',body=CHOICE_ICON_PATHS[key];
+ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+body+'</svg>';
+}
+
+const prefQs=['drive','shift','wheel','fork','brake','frame','brand'];const optionalQs=['tech','feel','weight','cool','value',...prefQs];
 function buildPrice(x){return x.sale??x.msrp;}function ceiling(){return state.stretch==='open'?Infinity:state.budget*(1+Number(state.stretch)/100);}function prefContribution(b,build){let delta=0,unknown=[];const prefs=state.prefs;
  for(const key of ['drive','shift','wheel','fork','brake']){
  const val=prefs[key];if(!val||val==='none')continue;
@@ -1284,7 +1354,7 @@ function bikePhoto(b){const p=BIKE_PHOTOS[b.id];if(!p)return `<div class="bikear
 function bikeSvg(color='#176b68'){return `<svg viewBox="0 0 270 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Generic mountain bike illustration"><circle cx="50" cy="91" r="27" stroke="#223c42" stroke-width="5"/><circle cx="220" cy="91" r="27" stroke="#223c42" stroke-width="5"/><path d="M50 91 91 40 142 91H50ZM91 40l67-2 62 53-78 0L91 40Z" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="m139 91 22-51 9-17m-9 17 26 5m-96-5-4-16m-18 0h32M220 91l-34-49" stroke="#243d42" stroke-width="5" stroke-linecap="round"/><circle cx="142" cy="91" r="8" stroke="#243d42" stroke-width="4"/><path d="m142 91 18 12" stroke="#243d42" stroke-width="4" stroke-linecap="round"/></svg>`;}
 function rankRows(target,limit,ignoreBrand=false){let list=ranked(ignoreBrand).slice(0,limit);$(target).innerHTML=list.map((b,i)=>`<div class="rank"><div class="ranknum ${i===0?'first':''}">${i+1}</div>${BIKE_PHOTOS[b.id]?`<img class="rankphoto" loading="lazy" referrerpolicy="no-referrer" src="${BIKE_PHOTOS[b.id].url}" alt="${b.name}" onerror="this.style.display='none'">`:``}<div class="rankmain"><div class="ranktitle">${b.name}</div><div class="rankmeta">${b.hardtail?'Hardtail':b.r+'mm rear'} · ${b.selected?money(b.selected.pr):'No eligible build'}</div><div class="bars"><i style="width:${b.match*10}%"></i></div></div><div class="score">${b.unavailable?'—':b.match.toFixed(1)}<small>/10</small></div></div>`).join('');}
 function questionShow(){const id=qid;const q=questions[id];let n=history.length+1;$('stepLabel').textContent='QUESTION '+n;$('progressLabel').textContent='Tell us about your rides';$('progressBar').style.width=Math.min(94,(n/guidedOrder().length)*100)+'%';$('questionTitle').textContent=id==='budget'?'What would you like to spend?':q.title;$('questionSub').textContent=id==='budget'?'Choose the price range you are comfortable shopping in.':q.sub;
-let html='';if(id==='budget'){html=`<div class="budget-band-choices" role="group" aria-label="Budget"><div class="choices budget-choice-grid">${[[5000,'Up to $5,000'],[7500,'Up to $7,500'],[10000,'Up to $10,000'],[12000,'$12,000+']].map(([value,label])=>`<button type="button" class="choice budget-choice ${answers.budget===value?'selected':''}" data-budget="${value}" aria-pressed="${answers.budget===value}"><span class="budget-circle">$</span><strong>${label}</strong></button>`).join('')}</div></div>`;}else if(id==='brand'){html=brandEditor();}else{let selected=Object.prototype.hasOwnProperty.call(answers,id)?answers[id]:null;html='<div class="choices">'+q.choices.map(x=>`<button type="button" class="choice ${selected===x[0]?'selected':''}" data-value="${x[0]}"><span class="sym">${x[3]}</span><span><strong>${x[1]}</strong><small>${x[2]}</small></span></button>`).join('')+'</div>';if(prefQs.includes(id)&&!['drive','shift'].includes(id)&&selected&&selected!=='none'){html+=`<div class="field"><label>How important is this preference?</label><select id="strengthSelect"><option value="prefer">Nice to have</option><option value="strong">Strong preference</option><option value="required">Required, exclude verified mismatches</option></select></div><p class="note">Missing component details must be verified for an exact build.</p>`;}}$('questionArea').innerHTML=html;
+let html='';if(id==='budget'){html=`<div class="budget-band-choices" role="group" aria-label="Budget"><div class="choices budget-choice-grid">${[[5000,'Up to $5,000'],[7500,'Up to $7,500'],[10000,'Up to $10,000'],[12000,'$12,000+']].map(([value,label])=>`<button type="button" class="choice budget-choice ${answers.budget===value?'selected':''}" data-budget="${value}" aria-pressed="${answers.budget===value}"><span class="budget-circle">$</span><strong>${label}</strong></button>`).join('')}</div></div>`;}else if(id==='brand'){html=brandEditor();}else{let selected=Object.prototype.hasOwnProperty.call(answers,id)?answers[id]:null;html='<div class="choices">'+q.choices.map(x=>`<button type="button" class="choice ${selected===x[0]?'selected':''}" data-value="${x[0]}"><span class="sym" aria-hidden="true">${questionChoiceIcon(id,x[0],x[1])}</span><span><strong>${x[1]}</strong><small>${x[2]}</small></span></button>`).join('')+'</div>';if(prefQs.includes(id)&&!['drive','shift'].includes(id)&&selected&&selected!=='none'){html+=`<div class="field"><label>How important is this preference?</label><select id="strengthSelect"><option value="prefer">Nice to have</option><option value="strong">Strong preference</option><option value="required">Required, exclude verified mismatches</option></select></div><p class="note">Missing component details must be verified for an exact build.</p>`;}}$('questionArea').innerHTML=html;
 if(id==='budget'){document.querySelectorAll('[data-budget]').forEach(el=>el.addEventListener('click',()=>{state.budget=Number(el.dataset.budget);state.stretch=state.budget>=12000?'open':'0';state.limit=state.budget<12000;state.overrides={};answers.budget=state.budget;document.querySelectorAll('[data-budget]').forEach(x=>{x.classList.toggle('selected',x===el);x.setAttribute('aria-pressed',x===el?'true':'false');});save();}));}else if(id==='brand'){renderBrandEditor($('questionArea'),()=>{answers.brand=true;save();});}else{document.querySelectorAll('#questionArea .choice').forEach(el=>el.addEventListener('click',()=>{answers[id]=el.dataset.value;updateFromAnswer(id,el.dataset.value);questionShow();save();}));if(prefQs.includes(id)&&!['drive','shift'].includes(id)&&$('strengthSelect')){$('strengthSelect').value=state.strength[id]||'prefer';$('strengthSelect').addEventListener('change',()=>{state.strength[id]=$('strengthSelect').value;save();});}}
 $('back').disabled=!history.length;$('skip').disabled=['quiver','suspensionType','ride','focus','budget'].includes(id);$('next').textContent=n>=guidedOrder().length?'See my finalists':'Continue →';}
 function refreshRank(){/* Rankings intentionally hidden during the guided questionnaire. */}
