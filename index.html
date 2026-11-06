@@ -1445,8 +1445,55 @@ for(const b of B){
  * numerical score changes from these group results until a consensus audit. */
 const HEAD_TO_HEAD_2026=[{"title":"The Loam Wolf · 2026 Short Travel Shootout","url":"https://theloamwolf.com/reviews/bikes/2026-short-travel-trail-bike-shootout/","date":"2026-09-18","type":"Multi-bike controlled group test; presented by Thule","models":{"ranger":"Among the more XC-leaning bikes: quick, light steering and excellent pedaling efficiency. Less downhill-focused than the Tallboy.","reya":"Longest rear center in the comparison; strong planted stability and speed confidence, at the expense of easy low-speed agility.","trailcatsl":"Technical singletrack specialist with excellent suspension feel and tight-trail maneuverability; cockpit and steep-climb positioning polarized reviewers.","tallboy":"Standout descending capability and balanced trail comfort, but not as efficient climbing as the Revel Ranger.","spur":"Remains a lively, broadly capable downcountry reference with a successful balance of pedaling and descending."}},{"title":"ENDURO · 2026 Trail Bike Group Test","url":"https://enduro-mtb.com/en/the-best-trail-bike-mtb-review/","date":"2026-09-08","type":"12-bike group test including eMTBs; exclude powered bikes from pedal-bike comparisons","models":{"trailcat":"Direct, efficient and cornering-precise with a firm sporty ride; less outright rough-terrain comfort than plush counterparts.","tallboy":"Lightweight, nimble and playful; encourages pumping and finding flow rather than simply erasing terrain.","stumpyevo":"Aggressive 160/145 mm build emphasized descending capability; this is the EVO variant, not the standard Stumpjumper 15.","fuelex":"Playful versatile Gen 7 bike with useful all-round handling; publication reports test-bike noise/build-quality caveats.","yetimt":"Test winner for an effective blend of traction, handling balance and descending capability; substantial premium cost."}},{"title":"The Loam Wolf · 2026 Enduro Group Test","url":"https://theloamwolf.com/reviews/bikes/2026-enduro-mtb-group-test/","date":"2026-10-25","type":"Eight-bike head-to-head; tested Yeti LT in mixed-wheel configuration","models":{"rallon7":"Outstanding fast, aggressive enduro descending and acceleration through rough sections, but less eager and efficient on climbs.","yetilt":"Particularly composed and balanced at race speed, with excellent supportive traction uphill and downhill; less playful and expensive. Mixed-wheel tested, not necessarily our 29er configuration."}},{"title":"ENDURO · 2026 Enduro Group Test","url":"https://enduro-mtb.com/en/the-best-enduro-mtb-review/","date":"2026-02-16","type":"14-bike group test, including two eMTBs; tested precise configurations may differ","models":{"firebird":"Best in Test: exceptionally efficient DW-link pedaling and direct, controlled handling with large enduro reserves; flexible suspension and geometry tuning.","rallon7":"Very planted and confidence-inspiring through serious descending, but one of the less efficient climbers. Tested 180/170 mm build; do not generalize across other forks.","fuellx":"Compared in Gen 7 enduro configuration; flexible Fuel platform with descending-focused setup, distinct from Fuel EX."}}];
 const HEAD_TO_HEAD_BY_BIKE=Object.fromEntries(B.map(b=>[b.id,HEAD_TO_HEAD_2026.filter(test=>Object.prototype.hasOwnProperty.call(test.models,b.id)).map(test=>({title:test.title,url:test.url,date:test.date,type:test.type,finding:test.models[b.id]}))]));
+/* Independent ride evidence v7.1 (2026-11-06).
+ * Reviewer numbers below are FindMyBike's editorial translations of the
+ * cited qualitative observations, NEVER numeric scores claimed by publishers.
+ * Only directly comparable current-generation independent ride tests qualify.
+ * Confidence is displayed separately and is not a performance multiplier.
+ * Until at least two independent comparable tests cover a dimension, preserve
+ * its existing, possibly provisional score. Full review audit is ongoing.
+ */
+const REVIEW_OBSERVATION_LEDGER_V71={
+ ranger:[
+  {publisher:'BIKEPACKING.com',url:'https://bikepacking.com/bikes/revel-ranger-v3-review/',kind:'full',cl:9.5,observation:'Excellent efficiency on rolling terrain and technical climbs'},
+  {publisher:'The Loam Wolf',url:'https://theloamwolf.com/reviews/bikes/revel-ranger/',kind:'full',cl:8.9,observation:'Some steep climbs exposed uneven traction and setup sensitivity'},
+  {publisher:'NSMB',url:'https://nsmb.com/articles/revel-ranger/',kind:'full',de:9.2,observation:'Strong suspension support on rugged descents for short travel'}
+ ],
+ trailcat:[
+  {publisher:'BikeRadar',url:'https://www.bikeradar.com/reviews/bikes/mountain-bikes/full-suspension-mountain-bikes/pivot-trailcat-lt-pro-x0-review',kind:'full',cl:8.8,observation:'Efficient pedaling and composed trail handling'},
+  {publisher:'ENDURO',url:'https://enduro-mtb.com/en/the-best-trail-bike-mtb-review/pivot-trailcat-lt-pro-x0/',kind:'full',cl:8.5,observation:'Front end needs deliberate weighting on some technical climbs'}
+ ],
+ mach4:[
+  {publisher:'Blister',url:'https://blisterreview.com/gear-reviews/pivot-mach-4-sl-v4',kind:'full',cl:9.65,observation:'Outstanding pedaling efficiency and race-ready handling'},
+  {publisher:'Bikerumor',url:'https://bikerumor.com/four-months-one-big-race-pivot-mach-4-sl-long-term-review/',kind:'full',de:8.85,observation:'More technically capable descending than typical XC expectations'}
+ ]
+};
+const REVIEW_TEST_WEIGHTS_V71={full:1,first:0.65,creator:0.6,retailer:0.35};
+/* No algorithmic text sentiment, no duplicate syndicated reports, and no
+ * inferred score from review count. Blend observed consensus with prior
+ * calibration to avoid false precision from just two sources.
+ */
+function observedRideRatings(b){
+ const notes=REVIEW_OBSERVATION_LEDGER_V71[b.id]||[];
+ const out={cl:b.cl,de:b.de,play:b.play};
+ const details={};
+ for(const dimension of ['cl','de','play']){
+  const eligible=notes.filter(n=>Number.isFinite(n[dimension])&&n.url&&n.publisher);
+  const unique=[...new Map(eligible.map(n=>[n.publisher.toLowerCase(),n])).values()];
+  if(unique.length<2){details[dimension]={status:'provisional',tests:unique.length};continue;}
+  const numerator=unique.reduce((s,n)=>s+n[dimension]*(REVIEW_TEST_WEIGHTS_V71[n.kind]||0),0);
+  const denominator=unique.reduce((s,n)=>s+(REVIEW_TEST_WEIGHTS_V71[n.kind]||0),0);
+  if(!denominator){details[dimension]={status:'provisional',tests:unique.length};continue;}
+  const consensus=numerator/denominator;
+  out[dimension]=Math.max(1,Math.min(10,0.65*consensus+0.35*b[dimension]));
+  details[dimension]={status:'review-calibrated',tests:unique.length,consensus};
+ }
+ return {...out,details};
+}
+
 function scoreComponents(b,ignoreBrand=false){
- const p=state.priority,r=state.ride;
+ const p={...state.priority,cl:state.priority.cl*2,de:state.priority.de*2},r=state.ride;
+ const reviewRide=observedRideRatings(b);
  const targetByRide={xc:118,dc:125,trail:143,enduro:165,mixed:137};
  let target=targetByRide[r]??137;
  if(state.quiver!=='one'&&state.quiver!=='unsure'){
@@ -1461,22 +1508,22 @@ function scoreComponents(b,ignoreBrand=false){
  const spread=state.quiver==='one'?36:27;
  const equivalentTravel=b.hardtail?(b.f>=140?136:b.f>=120?122:112):b.r;
  const catFit=Math.max(0,1-Math.pow((equivalentTravel-target)/spread,2));
- const terrain=state.tech==='rough'?(b.de-7.2)*.23:state.tech==='extreme'?(b.de-7.2)*.44:state.tech==='smooth'?(b.cl-8)*.17:0;
- const feel=state.feel==='playful'?(b.play-8)*.32:state.feel==='stable'?(b.de-8)*.28:0;
+ const terrain=state.tech==='rough'?(reviewRide.de-7.2)*.23:state.tech==='extreme'?(reviewRide.de-7.2)*.44:state.tech==='smooth'?(reviewRide.cl-8)*.17:0;
+ const feel=state.feel==='playful'?(reviewRide.play-8)*.32:state.feel==='stable'?(reviewRide.de-8)*.28:0;
  const mass=Math.max(4.4,Math.min(10,10-(usableWeight(b)-24)*.64));
  const sum=p.cl+p.de+p.weight+p.cool+p.play+5;
- const impact=state.features==='large'?(b.de-8)*.42+(b.r>=150?.25:-.55):state.features==='small'?(b.play-8)*.18:0;
+ const impact=state.features==='large'?(reviewRide.de-8)*.42+(b.r>=150?.25:-.55):state.features==='small'?(reviewRide.play-8)*.18:0;
  const htImpact=b.hardtail?((state.tech==='extreme'||state.park==='often')?-1.6:state.tech==='rough'?-.65:state.features==='large'?-1.15:state.quiver==='one'&&state.ride==='enduro'?-1.25:state.tech==='smooth'?.20:0):0;
- const park=state.park==='often'?(b.r>=155?.45:b.r<140?-.85:-.15):state.park==='sometimes'?(b.de-8)*.12:0;
+ const park=state.park==='often'?(b.r>=155?.45:b.r<140?-.85:-.15):state.park==='sometimes'?(reviewRide.de-8)*.12:0;
  const oneBikePenalty=state.quiver==='one'&&b.r>=160&&state.park!=='often'&&state.tech!=='extreme' ?-.5:0;
  const roleAdjustment=(catFit-.5)*(state.quiver==='one'?1.25:2.15);
  const brandAdj=ignoreBrand?0:(state.prefs.brand.includes(b.brand)?.24:0)-(state.prefs.exclude.includes(b.brand)?.32:0);
  const points={
    baseline:7.2*(1-.58),
-   climbing:.58*p.cl*b.cl/sum,
-   descending:.58*p.de*b.de/sum,
+   climbing:.58*p.cl*reviewRide.cl/sum,
+   descending:.58*p.de*reviewRide.de/sum,
    weight:.58*p.weight*mass/sum,
-   agility:.58*p.play*b.play/sum,
+   agility:.58*p.play*reviewRide.play/sum,
    design:.58*p.cool*b.cool/sum,
    travel:.58*5*(6.3+3.6*catFit)/sum+roleAdjustment,
    terrain:.58*(terrain+feel+impact+park+oneBikePenalty+htImpact),
@@ -1489,7 +1536,7 @@ function scoreComponents(b,ignoreBrand=false){
  const combined=rideClamped+brandAdj+points.value+points.reviews;
  const finalClamped=Math.max(1,Math.min(10,combined));
  points.cap=(rideClamped-rideRaw)+(finalClamped-combined);
- return {points,raw:finalClamped,rideMatch:rideClamped,match:Math.round(finalClamped*10)/10,catFit};
+ return {points,raw:finalClamped,rideMatch:rideClamped,match:Math.round(finalClamped*10)/10,catFit,reviewRide};
 }
 function scoreBike(b,ignoreBrand=false){
  if((state.suspensionType==='hardtail'&&!b.hardtail)||(state.suspensionType==='full'&&b.hardtail))return {...b,match:0,rideMatch:0,unavailable:true,selected:null};
@@ -1506,7 +1553,7 @@ function scoreBreakdownHTML(top){
  const data=top.map(b=>scoreComponents(b));
  const fmt=x=>`${x>=0?'+':'−'}${Math.abs(x).toFixed(2)}`;
  const rows=SCORE_ROWS.filter(([k])=>k==='baseline'||data.some(d=>Math.abs(d.points[k])>.0001));
- return `<details class="score-explainer"><summary>Why these bikes scored differently <span class="explain-arrow">▾</span></summary><div class="score-explainer-body"><p>The figures below are <b>actual contributions</b> to each model’s final score, computed from your answers. A positive contribution does not necessarily mean that bike beats another; compare across columns. The value contribution compares eligible build price and equipment with similar-travel bikes. Review confidence adds up to 0.20 points for independently tested current-generation bikes, but unreviewed bikes receive no penalty. Criticisms affect ride ratings only when independently substantiated. The common baseline and score-limit adjustment are part of the scoring formula.</p><div class="score-table-scroll"><table class="score-breakdown-table"><thead><tr><th>Score contribution</th>${top.map(b=>`<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(([k,label])=>`<tr><td>${label}</td>${data.map(d=>`<td>${fmt(d.points[k])}</td>`).join('')}</tr>`).join('')}<tr class="score-total"><td>Final score</td>${top.map(b=>`<td>${b.match.toFixed(1)}/10</td>`).join('')}</tr></tbody></table></div><p>Geometry informs the editorial ride ratings where reviewed, but is not a separate scoring input. Weight is a representative build, not necessarily your selected build. Scores are not measured probabilities.</p></div></details>`;
+ return `<details class="score-explainer"><summary>Why these bikes scored differently <span class="explain-arrow">▾</span></summary><div class="score-explainer-body"><p>The figures below are <b>actual contributions</b> to each model’s final score, computed from your answers. A positive contribution does not necessarily mean that bike beats another; compare across columns. The value contribution compares eligible build price and equipment with similar-travel bikes. Climbing and descending now receive 2× their previous relative factor weighting. Verified qualitative observations are converted into FindMyBike editorial sub-scores (not publisher-issued numbers), and a dimension is recalibrated only with at least two independent comparable tests. All other dimensions retain provisional ratings. Review confidence adds up to 0.20 points for independently tested current-generation bikes; unreviewed bikes receive no review-confidence bonus. The common baseline and score-limit adjustment are part of the scoring formula.</p><div class="score-table-scroll"><table class="score-breakdown-table"><thead><tr><th>Score contribution</th>${top.map(b=>`<th>${esc(b.name)}</th>`).join('')}</tr></thead><tbody>${rows.map(([k,label])=>`<tr><td>${label}</td>${data.map(d=>`<td>${fmt(d.points[k])}</td>`).join('')}</tr>`).join('')}<tr class="score-total"><td>Final score</td>${top.map(b=>`<td>${b.match.toFixed(1)}/10</td>`).join('')}</tr></tbody></table></div><p>Geometry informs the editorial ride ratings where reviewed, but is not a separate scoring input. Weight is a representative build, not necessarily your selected build. Scores are not measured probabilities.</p></div></details>`;
 }
 function closeMatchHTML(top){
  if(top.length<2)return '';
