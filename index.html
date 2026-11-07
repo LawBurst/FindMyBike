@@ -2701,7 +2701,7 @@ const FMB_BIKE_TYPES=[
  ['Downcountry','115–130 mm','ranger','XC-like efficiency with added descending capability','Long climbs and technical singletrack','Lively pedaling with more confidence downhill',9,7],
  ['Trail','125–150 mm','rascal','Balanced capability for everyday singletrack','A mix of technical climbs and descents','Versatile rather than specialized',8,8],
  ['All-mountain','140–160 mm','switchblade','More travel and stability for big mountain days','Steep natural trails, demanding descents and long climbs','More descending margin, usually more mass',7,9],
- ['Enduro','155–180 mm','firebird','Descents and repeated impacts are the priority','Enduro racing, steep terrain and bike-park days','Maximum descending confidence, generally less lively climbing',5,10],
+ ['Enduro','155–180 mm','ritual','Descents and repeated impacts are the priority','Enduro racing, steep terrain and bike-park days','Maximum descending confidence, generally less lively climbing',5,10],
  ['Hardtail','No rear suspension','transam','No rear shock, from XC to aggressive trail','Simplicity, direct feedback and lower maintenance','Less rear-wheel cushioning and rough-ground traction',null,null]
 ];
 function renderBikeTypes(){
@@ -2712,9 +2712,10 @@ function renderBikeTypes(){
  }).join('');
  $('typesCompare').innerHTML=FMB_BIKE_TYPES.filter(c=>c[6]!==null).map(c=>'<div class="fmb-type-chart-row"><b>'+esc(c[0])+'</b><div class="fmb-type-chart-bars"><div class="fmb-type-chart-track"><span style="width:'+(c[6]*10)+'%"></span></div><div class="fmb-type-chart-track descend"><span style="width:'+(c[7]*10)+'%"></span></div></div></div>').join('')+'<p class="note">Green: climbing/pedaling emphasis. Blue: descending/rough-terrain emphasis.</p>';
 }
-function returnFromBikeTypes(){forceWelcome=false;welcomeDismissed=true;setTab('wizard');$('questionTitle').scrollIntoView({behavior:'smooth',block:'start'});}
+let bikeTypesOriginWasWelcome=false;
+function returnFromBikeTypes(){forceWelcome=bikeTypesOriginWasWelcome;setTab('wizard');if(!bikeTypesOriginWasWelcome)$('questionTitle').scrollIntoView({behavior:'smooth',block:'start'});else window.scrollTo({top:0,behavior:'smooth'});}
 function setTab(tab){if(tab==='dashboard'&&!finished)tab='wizard';if(activeTab!==tab&&['dashboard','all','ratings','sources','types'].includes(tab))fmbTrack('Section viewed',{section:tab});activeTab=tab;const finalistTab=document.querySelector('[data-tab="dashboard"]');if(finalistTab)finalistTab.classList.toggle('hidden',!finished);['wizard','types','dashboard','all','ratings','sources','emtb'].forEach(n=>{$(n+'View').classList.toggle('hidden',n!==tab)});document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));if(tab==='dashboard')drawDashboard();if(tab==='types')renderBikeTypes();if(tab==='all')allTable();if(tab==='sources')renderSources();if(tab==='wizard')showWizardStage();updateEmtbEntry();}
-for(const id of ['typesReturnTop','typesReturnBottom','typesFromQuestion'])$(id).addEventListener('click',()=>{if(id==='typesFromQuestion'){setTab('types');window.scrollTo({top:0,behavior:'smooth'});}else returnFromBikeTypes();});$('startFinding').addEventListener('click',resetForNewSearch);
+for(const id of ['typesReturnTop','typesReturnBottom','typesFromQuestion'])$(id).addEventListener('click',()=>{if(id==='typesFromQuestion'){bikeTypesOriginWasWelcome=false;setTab('types');window.scrollTo({top:0,behavior:'smooth'});}else returnFromBikeTypes();});$('startFinding').addEventListener('click',resetForNewSearch);
 $('newSearch').addEventListener('click',resetForNewSearch);
 $('resumeSearch').addEventListener('click',()=>{
  forceWelcome=false;welcomeDismissed=true;
@@ -2733,7 +2734,7 @@ for(const id of ['emtbBack','emtbBackBottom'])document.getElementById(id).addEve
 $('homeBrand').addEventListener('click',openLaunchPage);
 $('homeBrand').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLaunchPage();}});
 function scrollToFinalists(){requestAnimationFrame(()=>{$('results').scrollIntoView({behavior:'auto',block:'start'});});}
-document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{if(el.dataset.tab!=='sources')clearReviewSourceReturn();if(el.dataset.tab==='wizard'){openLaunchPage();return;}if(el.dataset.tab==='all'&&comparisonBrandFilter){leaveBrandExplore(false);return;}setTab(el.dataset.tab);if(el.dataset.tab==='dashboard')scrollToFinalists();}));$('next').onclick=nextQuestion;$('back').onclick=prevQuestion;$('skip').onclick=()=>{if(['quiver','suspensionType','ride','terrain','focus','gravityClimb','budget'].includes(qid))return;answers[qid]='none';nextQuestion();};$('fineTune').onclick=()=>{$('tuning').scrollIntoView({behavior:'smooth',block:'start'});};$('resetResults').onclick=()=>{if(!confirm('Clear this rider’s answers and previous results, and start over?'))return;resetForNewSearch();};$('resetWizard').onclick=()=>$('resetResults').click();
+document.querySelectorAll('[data-tab]').forEach(el=>el.addEventListener('click',()=>{if(el.dataset.tab!=='sources')clearReviewSourceReturn();if(el.dataset.tab==='wizard'){openLaunchPage();return;}if(el.dataset.tab==='types'){bikeTypesOriginWasWelcome=forceWelcome||!welcomeDismissed;setTab('types');window.scrollTo({top:0,behavior:'smooth'});return;}if(el.dataset.tab==='all'&&comparisonBrandFilter){leaveBrandExplore(false);return;}setTab(el.dataset.tab);if(el.dataset.tab==='dashboard')scrollToFinalists();}));$('next').onclick=nextQuestion;$('back').onclick=prevQuestion;$('skip').onclick=()=>{if(['quiver','suspensionType','ride','terrain','focus','gravityClimb','budget'].includes(qid))return;answers[qid]='none';nextQuestion();};$('fineTune').onclick=()=>{$('tuning').scrollIntoView({behavior:'smooth',block:'start'});};$('resetResults').onclick=()=>{if(!confirm('Clear this rider’s answers and previous results, and start over?'))return;resetForNewSearch();};$('resetWizard').onclick=()=>$('resetResults').click();
 function makePrintableResults(){
   if(!finished){alert('Answer the questions and open Your Finalists first.');return;}
   const items=suitable().slice(0,3);
